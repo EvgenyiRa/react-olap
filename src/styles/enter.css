@@ -1,0 +1,319 @@
+a {
+    cursor: pointer;
+    color:blue;
+    text-decoration:underline;
+}
+
+
+div.loginContainer {
+  font-family: "Roboto", Arial, sans-serif;
+  font-weight: 400;
+  color: white;
+  background-image:url(../img/don.png);
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  background-position:100% 100%;
+  background-size:100% 100%;
+  width: 100%;
+  height: 100%;
+}
+
+.login {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -9.25em 0 0 -9.25em;
+  width: 18.5em;
+  height: 15rem;
+  color: rgba(255, 255, 255, 0.85);
+  display: inline-block;
+  font-size: 16px;
+  padding: 8px 12px;
+  text-decoration: none;
+  border-radius: 10px;
+  -webkit-background-clip: padding;
+  -moz-background-clip: padding;
+  background-clip: padding-box;
+  -webkit-box-shadow: inset -1px 1px 0px rgba(255, 255, 255, 0.3), inset 1px 1px 0px rgba(255, 255, 255, 0.3);
+  -moz-box-shadow: inset -1px 1px 0px rgba(255, 255, 255, 0.3), inset 1px 1px 0px rgba(255, 255, 255, 0.3);
+  box-shadow: inset -1px 1px 0px rgba(255, 255, 255, 0.3), inset 1px 1px 0px rgba(255, 255, 255, 0.3);
+  border: 1px solid #000;
+  background-color: rgba(0, 0, 0, 0.1);
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, rgba(0, 0, 0, 0.1)), color-stop(100%, rgba(0, 0, 0, 0.3)));
+  background-image: -webkit-linear-gradient(to right, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+  background-image: -moz-linear-gradient(to right, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+  background-image: -o-linear-gradient(to right, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+  box-sizing: content-box;
+}
+.login h2 {
+  margin: .5em;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  font-weight: 900;
+}
+.login input,
+.login label,
+.login .extra {
+  outline: none;
+  position: absolute;
+}
+
+.user,
+.password {
+  font-size: 150%;
+  color: #fff;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  height: 2em;
+  padding: .3em 0.5em .3em 2em;
+  width: 12.2em;
+  background: rgba(0, 0, 0, 0.3);
+  border: 0;
+  border-radius: 25px;
+  box-shadow: 0 -1px 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.password {
+  padding: .3em 70px .3em 40px;
+}
+
+[for="user"],
+.user {
+  top: 0;
+}
+
+[for="password"],
+.password,
+input[type="submit"] {
+  top: 4rem;
+}
+
+[for="password"],
+[for="user"] {
+  text-indent: -9999px;
+}
+[for="password"]:before,
+[for="user"]:before {
+  text-indent: 0;
+  position: absolute;
+  top: 12px;
+  left: 15px;
+  font-size: 120%;
+  z-index: 1;
+}
+
+input[type="submit"] {
+  right: 0.2rem;
+  height: 3.43em;
+  width: 7em;
+  background-color: #6bac14;
+  background-image: -webkit-gradient(linear, to bottom, to top, color-stop(0%, #8ff704), color-stop(100%, #1c8700));
+  background-image: -webkit-linear-gradient(to bottom, #8ff704, #1c8700);
+  background-image: -moz-linear-gradient(to bottom, #8ff704, #1c8700);
+  background-image: -o-linear-gradient(to bottom, #8ff704, #1c8700);
+  background-image: linear-gradient(to bottom, #8ff704, #1c8700);
+  border: 0;
+  border-radius: 0 25px 25px 0;
+  box-shadow: 0 5px 2px #a6ee40 inset, 1px 1px 0 rgba(0, 0, 0, 0.5);
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 14px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  text-align: center;
+  cursor:pointer;
+}
+
+input[type="submit"]:hover {
+  opacity:0.9;
+}
+
+label[for="remember"] {
+  top: 9rem;
+  left: 35%;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#remember {
+  visibility: hidden;
+}
+
+.remember:before, .remember:after {
+  visibility: visible;
+  content: '';
+  position: absolute;
+  left: -2.23em;
+  top: 0.1em;
+}
+.remember:before {
+  right: -2px;
+  width: 30px;
+  height: 15px;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, rgba(0, 0, 0, 0.1)), color-stop(100%, rgba(0, 0, 0, 0.2)));
+  background-image: -webkit-linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 100%);
+  background-image: -moz-linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 100%);
+  background-image: -o-linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 100%);
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+.remember:after {
+  top: 0.05em;
+  width: 1em;
+  height: 1em;
+  background-color: #fff;
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #e5e5e5), color-stop(100%, #878787));
+  background-image: -webkit-linear-gradient(to right, #e5e5e5 0%, #878787 100%);
+  background-image: -moz-linear-gradient(to right, #e5e5e5 0%, #878787 100%);
+  background-image: -o-linear-gradient(to right, #e5e5e5 0%, #878787 100%);
+  background-image: linear-gradient(to right, #e5e5e5 0%, #878787 100%);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  box-shadow: inset 0px 1px 1px white, 0 1px 1px rgba(0, 0, 0, 0.8);
+  right: 11px;
+}
+
+#remember:checked + .remember:before {
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #c25830), color-stop(100%, #f69c3c));
+  background-image: -webkit-linear-gradient(to right, #c25830 0%, #f69c3c 100%);
+  background-image: -moz-linear-gradient(to right, #c25830 0%, #f69c3c 100%);
+  background-image: -o-linear-gradient(to right, #c25830 0%, #f69c3c 100%);
+  background-image: linear-gradient(to right, #c25830 0%, #f69c3c 100%);
+}
+#remember:checked + .remember:after {
+  left: -21px;
+  font-family: FontAwesome;
+  content: '\f00c';
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.extra {
+  bottom: 0;
+  width: 100%;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.3);
+  left: 0;
+  border-radius: 0 0 10px 10px;
+  -webkit-box-shadow: inset -1px 1px 0px rgba(255, 255, 255, 0.3), inset 1px 0 0px rgba(255, 255, 255, 0.3);
+  -moz-box-shadow: inset -1px 1px 0px rgba(255, 255, 255, 0.3), inset 1px 0 0px rgba(255, 255, 255, 0.3);
+  box-shadow: inset -1px 1px 0px rgba(255, 255, 255, 0.3), inset 1px 0 0px rgba(255, 255, 255, 0.3);
+  border-top: 1px solid #000;
+  word-spacing: -1;
+}
+.extra a {
+  display: inline-block;
+  text-decoration: none;
+  height: 100%;
+}
+.extra a.facebook, .extra a.googlePlus {
+  top: 0;
+  background-position: left top;
+  background-repeat: no-repeat;
+  width: 49px;
+  text-indent: 9999px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.extra a.facebook:hover, .extra a.googlePlus:hover {
+  opacity:0.9;
+}
+
+.extra a.facebook:before, .extra a.googlePlus:before {
+  position: absolute;
+  top: 7px;
+  left: 12px;
+  text-indent: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 180%;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+.extra a.googlePlus {
+  border-radius: 0 0 10px 0;
+  right: 0;
+}
+.extra a.facebook {
+  right: 50px;
+}
+.extra a.facebook:before {
+  left: 19px;
+}
+.extra a.forgetPassword {
+  width: 200px;
+  color: #fff;
+  line-height: 45px;
+  text-align: left;
+  padding-left: 25px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+.extra a.forgetPassword:before {
+  font-family: FontAwesome;
+  content: '\f0e2';
+  padding-right: 5px;
+}
+
+.icon-user {
+    position: absolute;
+    height: 35px;
+    width: auto;
+    margin: 3px 0 0 9px;
+    z-index: 500;
+    opacity: 1;
+}
+
+/* Стили бара vladmaxi, можно удалить */
+.vladmaxi-top{
+	line-height: 24px;
+	font-size: 11px;
+	background: #eee;
+	text-transform: uppercase;
+	z-index: 9999;
+	position: fixed;
+	top:0;
+	left:0;
+	width:100%;
+	font-family: calibri;
+	font-size: 13px;
+	box-shadow: 1px 0px 2px rgba(0,0,0,0.2);
+	-webkit-animation: slideOut 0.5s ease-in-out 0.3s backwards;
+}
+@-webkit-keyframes slideOut{
+	0%{top:-30px; opacity: 0;}
+	100%{top:0px; opacity: 1;}
+}
+
+.vladmaxi-top a{
+	padding: 0px 10px;
+	letter-spacing: 1px;
+	color: #333;
+	text-shadow: 0px 1px 1px #fff;
+	display: block;
+	float: left;
+}
+.vladmaxi-top a:hover{
+	background: #fff;
+}
+.vladmaxi-top span.right{
+	float: right;
+}
+.vladmaxi-top span.right a{
+	float: left;
+	display: block;
+}
+
+div.divSelectCity {
+    position: relative;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+div.divSelectCity .MuiInputLabel-outlined.MuiInputLabel-shrink {
+    transform: translate(14px, 8px) scale(0.75);
+}
+
+div.divUsrPwd {
+    position: relative;
+}

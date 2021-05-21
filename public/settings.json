@@ -1,0 +1,4 @@
+{
+  "dataServer": "http://127.0.0.1:3777",
+  "reportServer": "http://127.0.0.77"
+}
