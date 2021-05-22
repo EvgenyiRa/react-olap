@@ -8,7 +8,8 @@ let dataServer,
     reportServerHost,
     axiosInstance,
     userInfo,
-    tagExit=false;
+    tagExit=false,
+    dbtype='ora';
 
 const houreLifeCookies = 8,
       idsLKKbyCity={vrn:1,
@@ -23,6 +24,9 @@ export { houreLifeCookies,idsLKKbyCity };
 settings.then(function(settings){
   dataServer=settings.dataServer;
   reportServer=settings.reportServer;
+  if (!!settings.dbtype) {
+      dbtype=settings.dbtype;
+  }
   axiosInstance = axios.create({
     baseURL: dataServer
   });
@@ -357,7 +361,7 @@ export function getQuery(data,callback,stateLoadObj) {
           stateLoadObj.current.setState((state) => ({vis:++state.vis}));
       }
       function axiosInstanceFunc() {
-        axiosInstance.post('/ora/query',data)
+        axiosInstance.post('/'+dbtype+'/query',data)
         .then(function(response) {
           if (response.status !== 200) {
             console.log('Authentication failed.' + response.status);
@@ -446,7 +450,7 @@ export function getExecQuery(data,callback,stateLoadObj) {
         stateLoadObj.current.setState((state) => ({vis:++state.vis}));
       }
       function axiosInstanceFunc() {
-        axiosInstance.post('/ora/execquery',data)
+        axiosInstance.post('/'+dbtype+'/execquery',data)
         .then(function(response) {
           if (response.status !== 200) {
             console.log('Authentication failed.' + response.status);
