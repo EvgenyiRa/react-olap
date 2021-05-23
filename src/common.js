@@ -9,7 +9,8 @@ let dataServer,
     axiosInstance,
     userInfo,
     tagExit=false,
-    dbtype='ora';
+    dbtype='ora',
+    prErrorData=false;
 
 const houreLifeCookies = 8,
       idsLKKbyCity={vrn:1,
@@ -32,6 +33,17 @@ settings.then(function(settings){
   });
 });
 
+function setDataError() {
+  if (!prErrorData) {
+    prErrorData=true;
+    alert('Ошибка верификации данных');
+    delAuth();
+  }
+  else {
+    delAuth();
+  }
+}
+
 export function getDataServer() {
   return dataServer;
 }
@@ -45,24 +57,29 @@ export function getReportServerConfigs(callback) {
       callback(reportServerHost,reportServer);
   }
   else {
-    function axiosInstanceFunc() {
-      let data0 = {};
-      data0.sql=`SELECT sys_context('USERENV', 'SERVER_HOST')  SERVER_HOST FROM dual`;
-      getQuery(data0,(response0)=> {
-          reportServerHost=response0.data[0].SERVER_HOST;
-          callback(reportServerHost,reportServer);
-      })
+    if (dbtype==='ora') {
+      function axiosInstanceFunc() {
+        let data0 = {};
+        data0.sql=`SELECT sys_context('USERENV', 'SERVER_HOST')  SERVER_HOST FROM dual`;
+        getQuery(data0,(response0)=> {
+            reportServerHost=response0.data[0].SERVER_HOST;
+            callback(reportServerHost,reportServer);
+        })
+      }
+      if (!!!axiosInstance) {
+        var MyInt= setInterval(function(){
+            if (!!axiosInstance) {
+              clearInterval (MyInt);
+              axiosInstanceFunc();
+            }
+        },500);
+      }
+      else {
+        axiosInstanceFunc();
+      }
     }
-    if (!!!axiosInstance) {
-      var MyInt= setInterval(function(){
-          if (!!axiosInstance) {
-            clearInterval (MyInt);
-            axiosInstanceFunc();
-          }
-      },500);
-    }
-    else {
-      axiosInstanceFunc();
+    else if (dbtype==='mssql') {
+        callback('def',reportServer);
     }
   }
 }
@@ -75,37 +92,72 @@ let token;
 export function setTokenReportServer(params,callback) {
   getReportServerConfigs((reportServerHost,reportServer) => {
     var data = {};
-    data.exec_params_in={};
-    //data.query_params={};
-    data.execsql=`Declare
-                      p_token    VARCHAR2(32);
-                      p_id       NUMBER;
-                   BEGIN
-                      SELECT sys_guid() INTO p_token FROM dual;
-                      SELECT web_token_id_sq.nextval INTO p_id FROM dual;
-                      DELETE web_token WHERE accdate < (SYSDATE - 1);
-                      COMMIT;
-                      INSERT INTO web_token
-                       (id, parameters_list, guid, DATABASE)
-                      VALUES
-                       (p_id, :parameters_list, p_token, :p_database);
-                      COMMIT;
-                      :params_url:='id='||p_id||'&token='||p_token||'&database='||:p_database;
-                    END;`;
-    data.exec_params_in['p_database']=reportServerHost;
-    if (!!params) {
-        data.exec_params_in['parameters_list']=params;
+    if (dbtype==='ora') {
+      data.exec_params_in={};
+      //data.query_params={};
+      data.execsql=`Declare
+                        p_token    VARCHAR2(32);
+                        p_id       NUMBER;
+                     BEGIN
+                        SELECT sys_guid() INTO p_token FROM dual;
+                        SELECT web_token_id_sq.nextval INTO p_id FROM dual;
+                        DELETE web_token WHERE accdate < (SYSDATE - 1);
+                        COMMIT;
+                        INSERT INTO web_token
+                         (id, parameters_list, guid, DATABASE)
+                        VALUES
+                         (p_id, :parameters_list, p_token, :p_database);
+                        COMMIT;
+                        :params_url:='id='||p_id||'&token='||p_token||'&database='||:p_database;
+                      END;`;
+      data.exec_params_in['p_database']=reportServerHost;
+      if (!!params) {
+          data.exec_params_in['parameters_list']=params;
+      }
+      else {
+          data.exec_params_in['parameters_list']='';
+      }
+      data.exec_params_out=[];
+      data.exec_params_out.push({name:'params_url',type:'string'});
+      getExecQuery(data,
+                   function(response) {
+                     callback(response)
+                   }
+                  );
     }
-    else {
-        data.exec_params_in['parameters_list']='';
+    else if (dbtype==='mssql') {
+      data.params={};
+      //data.query_params={};
+      data.sql=`SET NOCOUNT ON;
+                Declare
+                    @p_token    NVARCHAR(36),
+                    @get_date   datetime,
+                    @p_id       bigint;
+                 BEGIN
+                    SET @p_token = CAST(NEWID() as char(36));
+                    SET @get_date=GETDATE();
+                    DELETE WEB_TOKEN WHERE ACCDATE < DATEADD(day,-1, @get_date);
+                    INSERT INTO web_token
+                     (PARAMETERS_LIST, GUID, ACCDATE)
+                    VALUES
+                     (@parameters_list, @p_token, @get_date);
+                    SELECT @p_id = SCOPE_IDENTITY();
+                    SET @params_url='id='+CAST(@p_id as nvarchar)+'&token='+@p_token;
+                  END;`;
+      if (!!params) {
+          data.params['parameters_list']=params;
+      }
+      else {
+          data.params['parameters_list']='';
+      }
+      data.params_out=[];
+      data.params_out.push({name:'params_url',type:'nvarchar'});
+      getQuery(data,
+               function(response) {
+                 callback(response)
+               }
+              );
     }
-    data.exec_params_out=[];
-    data.exec_params_out.push({name:'params_url',type:'string'});
-    getExecQuery(data,
-                 function(response) {
-                   callback(response)
-                 }
-                );
   });
 }
 
@@ -154,7 +206,12 @@ export function getReportServerLink(params,callback) {
   getAuth((userInfo)=>{
             setTokenReportServer(params['forDB'],
                                   (response)=> {
-                                      callback(reportServer+"/client.php?cat_id="+params['cat_id']+"&form_id="+params['form_id']+'&'+response.data.execout['params_url']+'&login='+userInfo.login);
+                                      if (dbtype==='ora') {
+                                        callback(reportServer+"/client.php?cat_id="+params['cat_id']+"&form_id="+params['form_id']+'&'+response.data.execout['params_url']+'&login='+userInfo.login);
+                                      }
+                                      else if (dbtype==='mssql') {
+                                        callback(reportServer+"/client.php?cat_id="+params['cat_id']+"&form_id="+params['form_id']+'&'+response.output['params_url']+'&login='+userInfo.login);                                      
+                                      }
                                   }
                                 );
           }
@@ -374,14 +431,14 @@ export function getQuery(data,callback,stateLoadObj) {
           if (!!!response.data.message) {
             //set_cookie('tokenOne',response.data.tokenOne, houreLifeCookies);
             localStorage.setItem('tokenOne', response.data.tokenOne);
-            let responseDR=[...response.data.rows];
-            delete response.data;
-            response.data=responseDR;
-            callback(response);
+            const responseNew={data:response.data.rows};
+            if (!!response.data.output) {
+                responseNew.output=response.data.output
+            }
+            callback(responseNew);
           }
           else {
-            alert('Ошибка верификации данных');
-            delAuth();
+            setDataError();
           }
         });
       }
@@ -423,8 +480,7 @@ export function getHashPwd(data,callback,stateLoadObj) {
             callback({sol:response.data.sol,hash:response.data.hash});
           }
           else {
-            alert('Ошибка верификации данных');
-            delAuth();
+            setDataError();
           }
         });
       }
@@ -461,14 +517,19 @@ export function getExecQuery(data,callback,stateLoadObj) {
           if (!!!response.data.message) {
             //set_cookie('tokenOne',response.data.tokenOne, houreLifeCookies);
             localStorage.setItem('tokenOne', response.data.tokenOne);
-            let responseDR={...response.data.rows};
-            delete response.data;
-            response.data=responseDR;
-            callback(response);
+            if (dbtype==='ora') {
+              let responseDR={...response.data.rows};
+              delete response.data;
+              response.data=responseDR;
+              callback(response);
+            }
+            else if (dbtype==='mssql') {
+              let responseNew={result:response.data.result}
+              callback(responseNew);
+            }
           }
           else {
-            alert('Ошибка верификации данных');
-            delAuth();
+            setDataError();
           }
         });
       }
@@ -515,8 +576,7 @@ export function getAuth(callback,stateLoadObj) {
             callback(userInfo);
           }
           else {
-            alert('Ошибка верификации данных');
-            delAuth();
+            setDataError();
           }
         });
       }
@@ -652,8 +712,7 @@ export function getTableOLAP(data,callback,stateLoadObj) {
           callback(response.data.object);
         }
         else {
-          alert('Ошибка верификации данных');
-          delAuth();
+          setDataError();
         }
       });
     }
@@ -694,8 +753,7 @@ export function getPrint(data,callback,stateLoadObj) {
           callback(response.data);
         }
         else {
-          alert('Ошибка верификации данных');
-          delAuth();
+          setDataError();
         }
       });
     }
