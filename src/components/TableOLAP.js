@@ -1633,14 +1633,26 @@ class TableOLAP extends React.Component {
         if (getParamDiff(this.props.obj.paramGroup,prevProps.obj.paramGroup,this.props.obj.parParentID)) {
             const thisV=this;
             if (!!thisV.state.tabname) {
-              const data={};
-              data.execsql=`DROP TABLE `+thisV.state.tabname;
-              thisV.state.tabname=undefined;
-              getExecQuery(data,function(response) {
-                              thisV.getDataSQL();
-                            },
-                            thisV.props.obj.stateLoadObj
-                          );
+              const data={},
+                    dbtype=getDBType();
+              if (dbtype==='ora') {
+                data.execsql=`DROP TABLE `+thisV.state.tabname;
+                thisV.state.tabname=undefined;
+                getExecQuery(data,function(response) {
+                                thisV.getDataSQL();
+                              },
+                              thisV.props.obj.stateLoadObj
+                            );
+              }
+              else if (dbtype==='mssql') {
+                data.sql=`DROP TABLE `+thisV.state.tabname;
+                thisV.state.tabname=undefined;
+                getQuery(data,function(response) {
+                            thisV.getDataSQL();
+                          },
+                          thisV.props.obj.stateLoadObj
+                        );
+              }
             }
             else {
                 thisV.getDataSQL();

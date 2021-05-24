@@ -44,8 +44,8 @@ function Users() {
                         parChealdID:"users",
                         //необходимо наличие двух полей с именами value,label
                         sql:`SELECT DISTINCT
-                                    R.USER_ID "value",
-                                    R.FIO "label"
+                                    R.USER_ID [value],
+                                    R.FIO [label]
                                 FROM REP_USERS R
                                 where r.login like 'admin%'
                                 ORDER BY R.FIO`,
@@ -60,7 +60,7 @@ function Users() {
                          //наименование параметра для зависимых(дочерних) элементов
                          parChealdID:"rights",
                          //необходимо наличие двух полей с именами value,label
-                         sql:`select T.RIGHTS_ID "value",T.NAME "label"
+                         sql:`select T.RIGHTS_ID [value],T.NAME [label]
                                 from REP_RIGHTS t`,
                          multiple:true
                         };
@@ -89,11 +89,11 @@ function Users() {
         //let resp_data;
         data1.sql=`SELECT COUNT(1) COUNT
                     FROM REP_USERS
-                   WHERE login=:login`;
+                   WHERE login=@login`;
         if (type==='edit') {
           data.exec_params_in['user_id']=+$(tr).find('td#FIO input').val();
           data1.params.user_id=data.exec_params_in['user_id'];
-          data1.sql+=` AND USER_ID!=:user_id`;
+          data1.sql+=` AND USER_ID!=@user_id`;
         }
         getQuery(data1,(response1)=> {
                   if (response1.data[0].COUNT>0) {
@@ -447,44 +447,45 @@ function Users() {
     setParamGroup:setParamGroupV,
     parParentID:['users','rights'],
     data:{params_val: {},
-          sql_true: `SELECT NVL(U.FIO,'')||
-                            '<input type="hidden" value="'||U.USER_ID||'">'  FIO,
-                            U.LOGIN||
-                            '<input type="hidden" value="'||U.SOL||'">' LOGIN,
-                            U.EMAIL,
-                            U.PHONE,
-                            R.NAME||
-                            '<input type="hidden" value="'||R.RIGHTS_ID||'">' RIGHTS_NAME,
-                            '<input type="checkbox" class="usr_right_value" checked>' VALUE
+          sql_true: `SELECT U.FIO+
+                             '<input type="hidden" value="'+CAST(U.USER_ID AS VARCHAR)+'">'  FIO,
+                             U.LOGIN+
+                             '<input type="hidden" value="'+CAST(U.SOL AS VARCHAR)+'">' LOGIN,
+                             U.EMAIL+
+                             '<div class="div_hidden">'+U.PASSWORD+'</div>' EMAIL,
+                             U.PHONE,
+                             R.NAME+
+                             '<input type="hidden" value="'+CAST(R.RIGHTS_ID AS VARCHAR)+'">' RIGHTS_NAME,
+                             '<input type="checkbox" class="usr_right_value" checked>' VALUE
                       FROM REP_RIGHTS R
                       JOIN REP_USERS_RIGHTS UR
                       ON R.RIGHTS_ID=UR.RIGHT_ID
                       JOIN REP_USERS U
                       ON UR.USER_ID=U.USER_ID
-                      WHERE u.login like 'admin%' and (U.USER_ID IN (:users) OR (exists(SELECT 1 from table(sys.ODCINumberList(:users)) where COLUMN_VALUE is null)))
-                       AND (R.RIGHTS_ID IN (:rights) OR (exists(SELECT 1 from table(sys.ODCINumberList(:rights)) where COLUMN_VALUE is null)))
+                      WHERE U.USER_ID IN (@users)
+                        AND R.RIGHTS_ID IN (@rights)
                       UNION ALL
                       SELECT *
-                      FROM (SELECT U.FIO||
-                            '<input type="hidden" value="'||U.USER_ID||'">'  FIO,
-                            U.LOGIN||
-                            '<input type="hidden" value="'||U.SOL||'">' LOGIN,
-                            U.EMAIL,
-                            U.PHONE,
-                            R.NAME||
-                            '<input type="hidden" value="'||R.RIGHTS_ID||'">' RIGHTS_NAME,
-                            '<input type="checkbox" class="usr_right_value">' VALUE
+                      FROM (SELECT U.FIO+
+                             '<input type="hidden" value="'+CAST(U.USER_ID AS VARCHAR)+'">'  FIO,
+                             U.LOGIN+
+                             '<input type="hidden" value="'+CAST(U.SOL AS VARCHAR)+'">' LOGIN,
+                             U.EMAIL+
+                             '<div class="div_hidden">'+U.PASSWORD+'</div>' EMAIL,
+                             U.PHONE,
+                             R.NAME+
+                             '<input type="hidden" value="'+CAST(R.RIGHTS_ID AS VARCHAR)+'">' RIGHTS_NAME,
+                             '<input type="checkbox" class="usr_right_value">' VALUE
                       FROM REP_USERS U
                       LEFT JOIN REP_RIGHTS R
                       ON 1=1
-                      --WHERE U.USER_ID=2
                       AND NOT EXISTS(SELECT 1
-                                     FROM REP_USERS_RIGHTS UR
-                                    WHERE UR.USER_ID=U.USER_ID
-                                      AND UR.RIGHT_ID=R.RIGHTS_ID
-                                  )
-                      WHERE u.login like 'admin%' and (U.USER_ID IN (:users) OR (exists(SELECT 1 from table(sys.ODCINumberList(:users)) where COLUMN_VALUE is null)))
-                       AND (R.RIGHTS_ID IN (:rights) OR (exists(SELECT 1 from table(sys.ODCINumberList(:rights)) where COLUMN_VALUE is null)))
+                                      FROM REP_USERS_RIGHTS UR
+                                     WHERE UR.USER_ID=U.USER_ID
+                                       AND UR.RIGHT_ID=R.RIGHTS_ID
+                                   )
+                      WHERE U.USER_ID IN (@users)
+                        AND R.RIGHTS_ID IN (@rights)
                       ) T
                       WHERE T.RIGHTS_NAME!='<input type="hidden" value="">'`,
           tab_pok: [{"SYSNAME":"RIGHTS_NAME","NAME":"Наименование права"}],

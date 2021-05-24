@@ -339,13 +339,20 @@ export function getParamForSQL(paramGroup,parParentID,data) {
             }
             else {
                 if (paramGroup[item].length>0) {
-                  var str_for_sql_params=':'+item+'_0';
+                  let parSimv;
+                  if (dbtype==='ora') {
+                      parSimv=':';
+                  }
+                  else if (dbtype==='mssql') {
+                      parSimv='@';
+                  }
+                  let str_for_sql_params=parSimv+item+'_0';
                   data.params[item+'_0']=paramGroup[item][0];
                   for (var i = 1; i < paramGroup[item].length; i++) {
                     data.params[item+'_'+i]=paramGroup[item][i];
-                    str_for_sql_params+=',:'+item+'_'+i;
+                    str_for_sql_params+=','+parSimv+item+'_'+i;
                   }
-                  data.sql=data.sql.split(':'+item).join(str_for_sql_params);
+                  data.sql=data.sql.split(parSimv+item).join(str_for_sql_params);
                 }
                 else {
                     data.params[item]='';

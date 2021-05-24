@@ -330,6 +330,10 @@ span.multiselect-native-select div.input-group {
   width:auto;
 }
 
+.divBootstrapMultiselectBlock div.btn-group.open ul.multiselect-container.dropdown-menu {
+    display: block;
+}
+
 span.multiselect-native-select ul.multiselect-container.dropdown-menu li label {
     padding: 1% 3%;
     width: 100%;
