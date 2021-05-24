@@ -1,6 +1,6 @@
 import React from 'react';
 import CustomAlert from './CustomAlert';
-import {getParamForSQL,getParamDiff,secondstotime,getTableOLAP,getCursorPosition,getExecQuery,houreLifeCookies,getQuery,getTagExit} from '../common.js';
+import {getParamForSQL,getParamDiff,secondstotime,getTableOLAP,getCursorPosition,getExecQuery,houreLifeCookies,getQuery,getTagExit,getDBType} from '../common.js';
 
 import $ from 'jquery'
 
@@ -1538,38 +1538,84 @@ class TableOLAP extends React.Component {
     getDropTableOne() {
       if (!!this.state.tabname) {
         const data={},
-              tabname=this.state.tabname;
-        data.execsql=`DROP TABLE `+tabname;
-        this.state.tabname=undefined;
-        getExecQuery(data,function(response) {
-                        console.log('Удаление таблицы '+tabname);
-                        console.log(response);
-                    });
+              tabname=this.state.tabname,
+              dbtype=getDBType();
+        if (dbtype==='ora') {
+          data.execsql=`DROP TABLE `+tabname;
+          this.state.tabname=undefined;
+          getExecQuery(data,function(response) {
+                          console.log('Удаление таблицы '+tabname);
+                          console.log(response);
+                      });
+        }
+        else if (dbtype==='mssql') {
+          data.sql=`DROP TABLE `+tabname;
+          this.state.tabname=undefined;
+          getQuery(data,function(response) {
+                          console.log('Удаление таблицы '+tabname);
+                          console.log(response);
+                      });
+        }
       }
     }
 
     getDropTableAll() {
-      const data={sql:`SELECT T.OBJECT_NAME
-                        FROM dba_objects T
-                       WHERE object_name LIKE 'REP_TAB_%'
-                         AND object_type = 'TABLE'
-                         AND 24*(SYSDATE-T.CREATED)>`+houreLifeCookies
+      const dbtype=getDBType();
+      let data;
+      if (dbtype==='ora') {
+        data={sql:`SELECT T.OBJECT_NAME
+                      FROM dba_objects T
+                     WHERE object_name LIKE 'REP_TAB_%'
+                       AND object_type = 'TABLE'
+                       AND 24*(SYSDATE-T.CREATED)>`+houreLifeCookies
+               };
+      }
+      else if (dbtype==='mssql') {
+        data={sql:`SELECT T.TABLE_NAME OBJECT_NAME
+                    FROM INFORMATION_SCHEMA.TABLES T
+                    JOIN sysobjects s
+                    ON T.[TABLE_NAME] = s.[name]
+                    WHERE T.TABLE_TYPE LIKE 'BASE_TABLE'
+                    AND S.crdate<DATEADD(hh,-`+houreLifeCookies+`, GETDATE())
+                    AND T.TABLE_NAME LIKE 'REP_TAB_%'`
                  };
+      }
+
+
+
       if (!!this.state.tabname) {
-        data.sql+=` AND object_name!='`+this.state.tabname+`'`;
+        if (dbtype==='ora') {
+          data.sql+=` AND object_name!='`+this.state.tabname+`'`;
+        }
+        else if (dbtype==='mssql') {
+          data.sql+=` AND T.TABLE_NAME!='`+this.state.tabname+`'`;
+        }
       }
       getQuery(data,(response)=> {
           if (response.data.length>0) {
             const data1={};
-            data1.execsql=`BEGIN\n`;
-            response.data.forEach((item) => {
-              data1.execsql+=`EXECUTE IMMEDIATE 'DROP TABLE `+item.OBJECT_NAME+`';\n`;
-              console.log('Удаление таблицы '+item.OBJECT_NAME);
-            });
-            data1.execsql+=`END;`;
-            getExecQuery(data1,function(response1) {
-              console.log(response1);
-            });
+            if (dbtype==='ora') {
+              data1.execsql=`BEGIN\n`;
+              response.data.forEach((item) => {
+                data1.execsql+=`EXECUTE IMMEDIATE 'DROP TABLE `+item.OBJECT_NAME+`';\n`;
+                console.log('Удаление таблицы '+item.OBJECT_NAME);
+              });
+              data1.execsql+=`END;`;
+              getExecQuery(data1,function(response1) {
+                console.log(response1);
+              });
+            }
+            else if (dbtype==='mssql') {
+              data1.sql=`BEGIN\n`;
+              response.data.forEach((item) => {
+                data1.sql+=`EXECUTE ('DROP TABLE `+item.OBJECT_NAME+`');\n`;
+                console.log('Удаление таблицы '+item.OBJECT_NAME);
+              });
+              data1.sql+=`END;`;
+              getQuery(data1,function(response1) {
+                console.log(response1);
+              });
+            }
           }
       });
     }

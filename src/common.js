@@ -44,6 +44,10 @@ function setDataError() {
   }
 }
 
+export function getDBType() {
+  return dbtype;
+}
+
 export function getDataServer() {
   return dataServer;
 }
@@ -210,7 +214,7 @@ export function getReportServerLink(params,callback) {
                                         callback(reportServer+"/client.php?cat_id="+params['cat_id']+"&form_id="+params['form_id']+'&'+response.data.execout['params_url']+'&login='+userInfo.login);
                                       }
                                       else if (dbtype==='mssql') {
-                                        callback(reportServer+"/client.php?cat_id="+params['cat_id']+"&form_id="+params['form_id']+'&'+response.output['params_url']+'&login='+userInfo.login);                                      
+                                        callback(reportServer+"/client.php?cat_id="+params['cat_id']+"&form_id="+params['form_id']+'&'+response.output['params_url']+'&login='+userInfo.login);
                                       }
                                   }
                                 );
