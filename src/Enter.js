@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/enter.css';
 import EnterLogin from './img/enter_login.png';
 import EnterPassword from './img/enter_password.png';
@@ -7,27 +7,37 @@ import {Switch,Route} from 'react-router-dom';
 import {setAuthByToken,createPool} from './common.js';
 
 function Enter({setIsAuth}) {
+  useEffect(() => {
+    let cityV=localStorage.getItem('city');
+    if (cityV===null) {
+        cityV='def';
+        localStorage.setItem('city', cityV);
+    }
+  }, []);
+
   let [resultAuth,setResultAuth]=useState(null);
-  const refSelectC=useRef();
   const butEnterClick=()=>{
     /*alert('click');
     console.log('setIsAuth',setIsAuth);*/
-    setAuth({"login":document.getElementById('user').value,"password":document.getElementById('password').value,"city":'def'},
-      function(response) {
-        if ((response.status===200) & (!!response.data.token)) {
-            setIsAuth(true);
+    let userL=document.getElementById('user').value.trim(),
+        passwordL=document.getElementById('password').value.trim();
+    if ((userL.length>0) & (passwordL.length>0)) {
+      setAuth({"login":userL,"password":passwordL,"city":'def'},
+        function(response) {
+          if ((response.status===200) & (!!response.data.token)) {
+              setIsAuth(true);
+          }
+          else {
+            setResultAuth('Неправильное сочетание логин/пароль');
+            setIsAuth(false);
+          }
         }
-        else {
-          setResultAuth('Неправильное сочетание логин/пароль');
-          setIsAuth(false);
-        }
-      }
-    );
-  }
-  var cityV=localStorage.getItem('city');
-  if (cityV===null) {
-      cityV='vrn';
-      localStorage.setItem('city', cityV);
+      );
+    }
+    else {
+      setResultAuth('Заполните поля "Логин" и "Пароль"');
+      setIsAuth(false);
+    }
   }
 
   const EnterByToken=(props) => {

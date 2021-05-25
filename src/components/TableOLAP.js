@@ -1459,10 +1459,6 @@ class TableOLAP extends React.Component {
         if (!!this.props.obj.componentDidMount) {
             this.props.obj.componentDidMount(this);
         }
-
-        window.onbeforeunload = function() {
-            thisV.getDropTable();
-        };
     }
 
     componentWillUnmount() {
@@ -1704,49 +1700,51 @@ class TableOLAP extends React.Component {
 
     render() {
       const TableRender=({id,className}) => {
-          const ulBlock=this.getUlTabPol();
-          const panelBlock=() => {
-            if (this.prPanelMove) {
-              return null;
+          if (!!this.props.obj) {
+            const ulBlock=this.getUlTabPol();
+            const panelBlock=() => {
+              if (this.prPanelMove) {
+                return null;
+              }
+              if ((!!this.props.obj.addRow) || (!!this.props.obj.deleteRow) || (!!this.props.obj.dopAction) || (!!this.props.obj.editRow) || (this.graf)){
+                return <div className="TabOLAPPanelAction" dangerouslySetInnerHTML={{ __html:  this.panel[0].childNodes[0].innerHTML }}></div>;
+              }
+              else {
+                return null;
+              }
             }
-            if ((!!this.props.obj.addRow) || (!!this.props.obj.deleteRow) || (!!this.props.obj.dopAction) || (!!this.props.obj.editRow) || (this.graf)){
-              return <div className="TabOLAPPanelAction" dangerouslySetInnerHTML={{ __html:  this.panel[0].childNodes[0].innerHTML }}></div>;
-            }
-            else {
-              return null;
-            }
-          }
-          const tabOLAPPol=() => {
-            if (this.prPanelMove) {
-              return null;
-            }
-            else {
-              return <div className="TabOLAPPol" id={id}>
-                      <div style={{position: 'relative'}}>
-                        <a className="TabOLAPPol" id={id} draggable="true">Поля&#9660;</a>
-                        <ul className="tableOLAP dbl-border" id={id} dangerouslySetInnerHTML={{ __html:  ulBlock }}></ul>
+            const tabOLAPPol=() => {
+              if (this.prPanelMove) {
+                return null;
+              }
+              else {
+                return <div className="TabOLAPPol" id={id}>
+                        <div style={{position: 'relative'}}>
+                          <a className="TabOLAPPol" id={id} draggable="true">Поля&#9660;</a>
+                          <ul className="tableOLAP dbl-border" id={id} dangerouslySetInnerHTML={{ __html:  ulBlock }}></ul>
+                        </div>
                       </div>
-                    </div>
+              }
             }
-          }
-          let tabHtml;
-          if (!!this.state.itemsStrgrouping) {
-            tabHtml=this.state.itemsStrgrouping;
-          }
-          /*else if (!!this.state.itemsOrder) {
-              tabHtml=this.state.itemsOrder;
-          }*/
-          else {
-              tabHtml=this.state.items;
-          }
-          return <div className="divForTableOLAP" id={id}>
-                    <div className="divContextMenu">
-                    </div>
-                    {panelBlock()}
-                    {tabOLAPPol()}
-                    <table id={id} className={'tableOLAP'+((!!className)?' '+className:'')} dangerouslySetInnerHTML={{ __html:tabHtml }}>
-                    </table>
-                 </div>;
+            let tabHtml;
+            if (!!this.state.itemsStrgrouping) {
+              tabHtml=this.state.itemsStrgrouping;
+            }
+            else {
+                tabHtml=this.state.items;
+            }
+            return <div className="divForTableOLAP" id={id}>
+                      <div className="divContextMenu">
+                      </div>
+                      {panelBlock()}
+                      {tabOLAPPol()}
+                      <table id={id} className={'tableOLAP'+((!!className)?' '+className:'')} dangerouslySetInnerHTML={{ __html:tabHtml }}>
+                      </table>
+                   </div>;
+         }
+         else {
+           return null;
+         }
       }
 
         return (

@@ -139,14 +139,18 @@ function Users() {
                         }
                     }
                     else if (type==='edit') {
-                        let data0;
+                        let data0,
+                            password='';
                         if (!!refInputPwdVis.current.state.value) {
-                          if (refInputPwdVis.current.state.value.length<6) {
-                            prErr=true;
-                            refInputPwdVis.current.setState({isInvalid:true,invalidText:'Не менее 6 символов'});
-                          }
-                          else {
-                            data0={password:refInputPwdVis.current.state.value}
+                          password=refInputPwdVis.current.state.value.trim();
+                          if (password.length>0) {
+                            if (password.length<6) {
+                              prErr=true;
+                              refInputPwdVis.current.setState({isInvalid:true,invalidText:'Не менее 6 символов'});
+                            }
+                            else {
+                              data0={password:password}
+                            }
                           }
                         }
                         if (!prErr) {
@@ -154,7 +158,7 @@ function Users() {
                           data.sql=`UPDATE REP_USERS
                                            SET FIO=@fio,
                                                LOGIN=@login,
-                                               PASSWORD=ISNULL(@password,PASSWORD),
+                                               PASSWORD=COALESCE(@password,PASSWORD),
                                                EMAIL=@email,
                                                PHONE=@phone
                                          WHERE USER_ID=@user_id`;
@@ -177,7 +181,7 @@ function Users() {
                                         refLoadState
                                       );
                          }
-                         if (!!refInputPwdVis.current.state.value) {
+                         if (password.length>0) {
                           data0.sol=$(tr).find('td#LOGIN input').val();
                           getHashPwd(data0,
                                      function(response) {
