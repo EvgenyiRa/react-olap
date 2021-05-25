@@ -670,11 +670,12 @@ div.MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl fieldset {
 
 div.divForInputBC {
   margin: 0.7rem 0.7rem 0 0;
+  position: relative;
 }
 
 div.divForInputBC label.labelForInputBC {
   position: absolute;
-  top: 0.3rem;
+  top: -0.4rem;
   left: 1.5rem;
   background: white;
   padding: 0 0.3rem;
@@ -919,4 +920,37 @@ div.divContextMenu>p:not(.label):hover {
 .pro-sidebar .pro-menu .pro-menu-item > .pro-inner-item span.pro-item-content:hover {
     color: white;
     text-shadow: 0.1em 0.1em 0.1em black, 0 0 0.7em #334949; /* Параметры тени */
+}
+
+.modal-header .close {
+    padding: 1rem 1rem;
+    margin: -1rem -1rem -1rem auto;
+}
+
+button.close {
+    padding: 0;
+    background-color: transparent;
+    border: 0;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.close {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .5;
 }
