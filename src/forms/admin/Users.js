@@ -14,7 +14,7 @@ import Col from 'react-bootstrap/Col';
 
 import $ from 'jquery'
 
-import {getExecQuery,getHashPwd,getQuery} from '../../common.js';
+import {getQuery,getHashPwd} from '../../common.js';
 
 function Users() {
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
@@ -69,9 +69,9 @@ function Users() {
   const getModalStageUser=(type,tr) => {
     const handleButtonNextL=() => {
       let data={};
-      data.exec_params_in={};
-      data.exec_params_in['fio']=refInputFIO.current.state.value;
-      data.exec_params_in['login']=refInputLogin.current.state.value;
+      data.params={};
+      data.params['fio']=refInputFIO.current.state.value;
+      data.params['login']=refInputLogin.current.state.value;
       let prErr=false;
       if ((!!!refInputFIO.current.state.value) || (!!!refInputLogin.current.state.value)) {
         prErr=true;
@@ -85,14 +85,14 @@ function Users() {
       if (!prErr) {
         //проверяем существование пользователя с введенным логином
         let data1={};
-        data1.params={login:data.exec_params_in['login']};
+        data1.params={login:data.params['login']};
         //let resp_data;
         data1.sql=`SELECT COUNT(1) COUNT
                     FROM REP_USERS
                    WHERE login=@login`;
         if (type==='edit') {
-          data.exec_params_in['user_id']=+$(tr).find('td#FIO input').val();
-          data1.params.user_id=data.exec_params_in['user_id'];
+          data.params['user_id']=+$(tr).find('td#FIO input').val();
+          data1.params.user_id=data.params['user_id'];
           data1.sql+=` AND USER_ID!=@user_id`;
         }
         getQuery(data1,(response1)=> {
@@ -100,8 +100,8 @@ function Users() {
                       refInputLogin.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
                   }
                   else {
-                    data.exec_params_in['email']=(!!!refInputEmail.current.state.value)?null:refInputEmail.current.state.value.trim();
-                    data.exec_params_in['phone']=(!!!refInputPhone.current.state.value)?null:refInputPhone.current.state.value.trim();
+                    data.params['email']=(!!!refInputEmail.current.state.value)?null:refInputEmail.current.state.value.trim();
+                    data.params['phone']=(!!!refInputPhone.current.state.value)?null:refInputPhone.current.state.value.trim();
                     if (type==='add') {
                         let data0={password:refInputPwdVis.current.state.value};
                         if (!!!refInputPwdVis.current.state.value) {
@@ -113,18 +113,20 @@ function Users() {
                           refInputPwdVis.current.setState({isInvalid:true,invalidText:'Не менее 6 символов'})
                         }
                         if (!prErr) {
-                          data.execsql=`INSERT INTO REP_USERS (USER_ID, FIO, LOGIN, PASSWORD, EMAIL, PHONE, SOL)
-                                        VALUES (REP_USERS_ID_SQ.NEXTVAL, :fio, :login, :password, :email, :phone, :sol)
-                                     RETURNING USER_ID INTO :user_id`;
-                         data.exec_params_out=[];
-                         data.exec_params_out.push({name:'user_id',type:'number'});
+                          data.sql=`BEGIN
+                                      INSERT INTO REP_USERS (FIO, LOGIN, PASSWORD, EMAIL, PHONE, SOL)
+                                           VALUES (@fio, @login, @password, @email, @phone, @sol);
+                                      SELECT @user_id = SCOPE_IDENTITY();
+                                    END;`;
+                         data.params_out=[];
+                         data.params_out.push({name:'user_id',type:'bigint'});
                           getHashPwd(data0,
                                      function(response) {
-                                       data.exec_params_in['password']=response.hash;
-                                       data.exec_params_in['sol']=response.sol;
-                                       getExecQuery(data,
+                                       data.params['password']=response.hash;
+                                       data.params['sol']=response.sol;
+                                       getQuery(data,
                                                     function(response0) {
-                                                       const newUsers=[...refSelectUser.current.state.options,{label:data.exec_params_in['fio'],value:response0.data.execout['user_id']}];
+                                                       const newUsers=[...refSelectUser.current.state.options,{label:data.params['fio'],value:response0.output['user_id']}];
                                                        refSelectUser.current.setState({options:newUsers});
                                                        refTableOLAP.current.getDropTableOne();
                                                        refTableOLAP.current.getDataSQL();
@@ -149,22 +151,22 @@ function Users() {
                           }
                         }
                         if (!prErr) {
-                          data.exec_params_in['password']=null;
-                          data.execsql=`UPDATE REP_USERS
-                                           SET FIO=:fio,
-                                               LOGIN=:login,
-                                               PASSWORD=NVL(:password,PASSWORD),
-                                               EMAIL=:email,
-                                               PHONE=:phone
-                                         WHERE USER_ID=:user_id`;
+                          data.params['password']=null;
+                          data.sql=`UPDATE REP_USERS
+                                           SET FIO=@fio,
+                                               LOGIN=@login,
+                                               PASSWORD=ISNULL(@password,PASSWORD),
+                                               EMAIL=@email,
+                                               PHONE=@phone
+                                         WHERE USER_ID=@user_id`;
                          function updUser() {
-                           getExecQuery(data,
+                           getQuery(data,
                                         function(response0) {
                                            //находим пользователя в списке, правим фамилию на случай если изменили
                                            const newUsers=[...refSelectUser.current.state.options];
                                            for (var i = 0; i < newUsers.length; i++) {
-                                             if (+newUsers[i].value===data.exec_params_in['user_id']) {
-                                               newUsers[i].label=data.exec_params_in['fio'];
+                                             if (+newUsers[i].value===data.params['user_id']) {
+                                               newUsers[i].label=data.params['fio'];
                                                refSelectUser.current.setState({options:newUsers});
                                                break;
                                              }
@@ -180,7 +182,7 @@ function Users() {
                           data0.sol=$(tr).find('td#LOGIN input').val();
                           getHashPwd(data0,
                                      function(response) {
-                                       data.exec_params_in['password']=response.hash;
+                                       data.params['password']=response.hash;
                                        updUser();
                                      },
                                      refLoadState
@@ -297,9 +299,9 @@ function Users() {
   const getModalStageRight=(type,td) => {
     const handleButtonNextL=() => {
       let data={};
-      data.exec_params_in={};
-      data.exec_params_in['rightName']=refInputRightName.current.state.value;
-      data.exec_params_in['rightSysName']=refInputRightSysName.current.state.value;
+      data.params={};
+      data.params['rightName']=refInputRightName.current.state.value;
+      data.params['rightSysName']=refInputRightSysName.current.state.value;
       let prErr=false;
       if ((!!!refInputRightName.current.state.value) || (!!!refInputRightSysName.current.state.value)) {
         prErr=true;
@@ -313,15 +315,15 @@ function Users() {
       if (!prErr) {
         //проверяем существование права с введенными наименованиями
         let data1={};
-        data1.params={sysname:data.exec_params_in['rightSysName']};
+        data1.params={sysname:data.params['rightSysName']};
         //let resp_data;
         data1.sql=`SELECT COUNT(1) COUNT
                      FROM REP_RIGHTS
-                    WHERE SYSNAME=:sysname`;
+                    WHERE SYSNAME=@sysname`;
         if (type==='edit') {
-          data.exec_params_in['right_id']=$(td).find('input').val();
-          data1.params.right_id=data.exec_params_in['right_id'];
-          data1.sql+=` AND RIGHTS_ID!=:right_id`;
+          data.params['right_id']=$(td).find('input').val();
+          data1.params.right_id=data.params['right_id'];
+          data1.sql+=` AND RIGHTS_ID!=@right_id`;
         }
         getQuery(data1,(response1)=> {
                   if (response1.data[0].COUNT>0) {
@@ -330,13 +332,15 @@ function Users() {
                   else {
                     if (type==='add') {
                         if (!prErr) {
-                          data.execsql=`INSERT INTO REP_RIGHTS (RIGHTS_ID, NAME, SYSNAME) VALUES (REP_RIGHTS_ID_SQ.NEXTVAL, :rightName, :rightSysName)
-                                           RETURNING RIGHTS_ID INTO :right_id`;
-                           data.exec_params_out=[];
-                           data.exec_params_out.push({name:'right_id',type:'number'});
-                           getExecQuery(data,
+                          data.sql=`BEGIN
+                                      INSERT INTO REP_RIGHTS (NAME, SYSNAME) VALUES (@rightName, @rightSysName);
+                                      SELECT @right_id = SCOPE_IDENTITY();
+                                    END;`;
+                           data.params_out=[];
+                           data.params_out.push({name:'right_id',type:'bigint'});
+                           getQuery(data,
                                         function(response0) {
-                                           const newRights=[...refSelectRight.current.state.options,{label:data.exec_params_in['rightName'],value:response0.data.execout['right_id']}];
+                                           const newRights=[...refSelectRight.current.state.options,{label:data.params['rightName'],value:response0.data.execout['right_id']}];
                                            refSelectRight.current.setState({options:newRights});
                                            refTableOLAP.current.getDropTableOne();
                                            refTableOLAP.current.getDataSQL();
@@ -348,15 +352,15 @@ function Users() {
                     }
                     else if (type==='edit') {
                       if (!prErr) {
-                        data.execsql=`UPDATE REP_RIGHTS
-                                         SET NAME=:rightName, SYSNAME=:rightSysName
-                                       WHERE RIGHTS_ID=:right_id`;
-                         getExecQuery(data,
+                        data.sql=`UPDATE REP_RIGHTS
+                                     SET NAME=@rightName, SYSNAME=@rightSysName
+                                   WHERE RIGHTS_ID=@right_id`;
+                         getQuery(data,
                                       function(response0) {
                                          const newRights=[...refSelectRight.current.state.options];
                                          for (var i = 0; i < newRights.length; i++) {
-                                           if (+newRights[i].value===data.exec_params_in['right_id']) {
-                                             newRights[i].label=data.exec_params_in['rightName'];
+                                           if (+newRights[i].value===data.params['right_id']) {
+                                             newRights[i].label=data.params['rightName'];
                                              refSelectRight.current.setState({options:newRights});
                                              break;
                                            }
@@ -382,7 +386,7 @@ function Users() {
       //let resp_data;
       data1.sql=`SELECT SYSNAME
                    FROM REP_RIGHTS
-                  WHERE RIGHTS_ID=:right_id`;
+                  WHERE RIGHTS_ID=@right_id`;
       getQuery(data1,(response1) => {
           $('input#'+refInputRightSysName.current.props.obj.id).val(response1.data[0].SYSNAME);
           refInputRightSysName.current.setState({value:response1.data[0].SYSNAME});
@@ -527,20 +531,20 @@ function Users() {
                                                             let user_id=$(thisV.state.selectRow[0]).find('td#FIO input').val();
                                                             if (!!user_id) {
                                                                 let data={};
-                                                                data.exec_params_in={};
-                                                                data.execsql=`BEGIN
+                                                                data.params={};
+                                                                data.sql=`BEGIN
                                                                                 DELETE FROM REP_USERS
-                                                                                WHERE USER_ID=:user_id;
+                                                                                WHERE USER_ID=@user_id;
                                                                                 DELETE FROM REP_USERS_RIGHTS
-                                                                                WHERE USER_ID=:user_id;
+                                                                                WHERE USER_ID=@user_id;
                                                                               END;`;
-                                                                data.exec_params_in['user_id']=+user_id;
-                                                                getExecQuery(data,
+                                                                data.params['user_id']=+user_id;
+                                                                getQuery(data,
                                                                              function(response0) {
                                                                                 //находим пользователя в списке, удаляем
                                                                                 const newUsers=[...refSelectUser.current.state.options];
                                                                                 for (var i = 0; i < newUsers.length; i++) {
-                                                                                   if (+newUsers[i].value===data.exec_params_in['user_id']) {
+                                                                                   if (+newUsers[i].value===data.params['user_id']) {
                                                                                      newUsers.splice(i, 1);
                                                                                      refSelectUser.current.setState({options:newUsers});
                                                                                      break;
@@ -582,21 +586,21 @@ function Users() {
                                                                let right_id=$(thisV.state.selectTd[0]).find('input').val();
                                                                if (!!right_id) {
                                                                    let data={};
-                                                                   data.exec_params_in={};
-                                                                   data.execsql=`BEGIN
+                                                                   data.params={};
+                                                                   data.sql=`BEGIN
                                                                                    DELETE FROM REP_USERS_RIGHTS
-                                                                                    WHERE RIGHT_ID=:right_id;
+                                                                                    WHERE RIGHT_ID=@right_id;
                                                                                    DELETE
                                                                                     FROM REP_RIGHTS
-                                                                                   WHERE RIGHTS_ID=:right_id;
+                                                                                   WHERE RIGHTS_ID=@right_id;
                                                                                  END;`;
-                                                                   data.exec_params_in['right_id']=+right_id;
-                                                                   getExecQuery(data,
+                                                                   data.params['right_id']=+right_id;
+                                                                   getQuery(data,
                                                                                 function(response0) {
                                                                                   //находим право в списке, удаляем
                                                                                   const newRights=[...refSelectRight.current.state.options];
                                                                                   for (var i = 0; i < newRights.length; i++) {
-                                                                                    if (+newRights[i].value===data.exec_params_in['right_id']) {
+                                                                                    if (+newRights[i].value===data.params['right_id']) {
                                                                                       newRights.splice(i, 1);
                                                                                       refSelectRight.current.setState({options:newRights});
                                                                                       break;
@@ -630,18 +634,18 @@ function Users() {
                    });
                    if ((!!user_id) & (!!right_id)) {
                        let data={};
-                       data.exec_params_in={};
+                       data.params={};
                        if ($(element).prop('checked')) {
-                           data.execsql=`INSERT INTO REP_USERS_RIGHTS (RUR_ID, USER_ID, RIGHT_ID)
-                                              VALUES (REP_USERS_RIGHTS_ID_SQ.NEXTVAL, :user_id,:right_id)`;
+                           data.sql=`INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
+                                     VALUES (@user_id,@right_id)`;
                        }
                        else {
-                           data.execsql=`DELETE FROM REP_USERS_RIGHTS
-                                          WHERE USER_ID=:user_id AND RIGHT_ID=:right_id`;
+                           data.sql=`DELETE FROM REP_USERS_RIGHTS
+                                      WHERE USER_ID=@user_id AND RIGHT_ID=@right_id`;
                        }
-                       data.exec_params_in['user_id']=+user_id;
-                       data.exec_params_in['right_id']=+right_id;
-                       getExecQuery(data,
+                       data.params['user_id']=+user_id;
+                       data.params['right_id']=+right_id;
+                       getQuery(data,
                                     function(response0) {
                                        console.log(response0.data);
                                     }
