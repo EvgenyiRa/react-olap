@@ -47,7 +47,6 @@ function Users() {
                                     R.USER_ID [value],
                                     R.FIO [label]
                                 FROM REP_USERS R
-                                where r.login like 'admin%'
                                 ORDER BY R.FIO`,
                         multiple:true
                        };
@@ -340,7 +339,7 @@ function Users() {
                            data.params_out.push({name:'right_id',type:'bigint'});
                            getQuery(data,
                                         function(response0) {
-                                           const newRights=[...refSelectRight.current.state.options,{label:data.params['rightName'],value:response0.data.execout['right_id']}];
+                                           const newRights=[...refSelectRight.current.state.options,{label:data.params['rightName'],value:response0.output['right_id']}];
                                            refSelectRight.current.setState({options:newRights});
                                            refTableOLAP.current.getDropTableOne();
                                            refTableOLAP.current.getDataSQL();

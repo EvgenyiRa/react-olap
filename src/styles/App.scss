@@ -281,7 +281,7 @@ div.divBootstrapMultiselectBlock span div.btn-group button span.multiselect-sele
   float:left;
 }
 
-span.multiselect-native-select div.btn-group.show ul.dropdown-menu {
+span.multiselect-native-select div.btn-group.open ul.dropdown-menu {
     display: block;
     max-width: 21em;
     width: max-content;
@@ -290,7 +290,7 @@ span.multiselect-native-select div.btn-group.show ul.dropdown-menu {
     max-height: 21em;
 }
 
-span.multiselect-native-select div.btn-group.show ul.dropdown-menu li:not(.multiselect-filter):hover{
+span.multiselect-native-select div.btn-group.open ul.dropdown-menu li:not(.multiselect-filter):hover{
   background: #d4fcfc;
 }
 
