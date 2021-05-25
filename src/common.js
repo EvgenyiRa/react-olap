@@ -355,7 +355,7 @@ export function getParamForSQL(paramGroup,parParentID,data) {
                   data.sql=data.sql.split(parSimv+item).join(str_for_sql_params);
                 }
                 else {
-                    data.params[item]='';
+                    data.params[item]=null;
                 }
             }
         });

@@ -462,8 +462,8 @@ function Users() {
                       ON R.RIGHTS_ID=UR.RIGHT_ID
                       JOIN REP_USERS U
                       ON UR.USER_ID=U.USER_ID
-                      WHERE U.USER_ID IN (@users)
-                        AND R.RIGHTS_ID IN (@rights)
+                      WHERE (U.USER_ID IN (@users) OR -1=COALESCE(@users,-1))
+                        AND (R.RIGHTS_ID IN (@rights) OR -1=COALESCE(@rights,-1))
                       UNION ALL
                       SELECT *
                       FROM (SELECT U.FIO+
@@ -484,8 +484,8 @@ function Users() {
                                      WHERE UR.USER_ID=U.USER_ID
                                        AND UR.RIGHT_ID=R.RIGHTS_ID
                                    )
-                      WHERE U.USER_ID IN (@users)
-                        AND R.RIGHTS_ID IN (@rights)
+                      WHERE (U.USER_ID IN (@users) OR -1=COALESCE(@users,-1))
+                        AND (R.RIGHTS_ID IN (@rights) OR -1=COALESCE(@rights,-1))
                       ) T
                       WHERE T.RIGHTS_NAME!='<input type="hidden" value="">'`,
           tab_pok: [{"SYSNAME":"RIGHTS_NAME","NAME":"Наименование права"}],
