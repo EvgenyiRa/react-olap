@@ -103,7 +103,9 @@ class TableOLAP extends React.Component {
 
        //создаем список незадействованных полей
        this.getUlTabPol=() => {
-         let res='';
+         let res='<div style="position:relative">'+
+                      '<a class="TabOLAPPol" id="'+props.obj.id+'" draggable="true">Поля&#9660;</a>'+
+                      '<ul class="tableOLAP dbl-border" id="'+props.obj.id+'">';
          if (this.state.data.tab_pol.length>0) {
            this.state.data.tab_pol.forEach((item) => {
              res+='<li id="'+item.SYSNAME+'" draggable="true" class="tab_pol liTableOLAP"><a id="'+item.SYSNAME+'">'+item.NAME+'</a></li>';
@@ -112,6 +114,7 @@ class TableOLAP extends React.Component {
          else {
             res+='<li id="null"><a>Отсутствуют</a></li>';
          }
+         res+='</ul></div>';
          return res;
       }
 
@@ -762,10 +765,12 @@ class TableOLAP extends React.Component {
                         if ((!!thisV.props.obj.addRow) || (!!thisV.props.obj.deleteRow) || (!!thisV.props.obj.dopAction) || (!!thisV.props.obj.editRow) || (this.graf)) {
                             //перемещаем панель действий в подходящее место, если есть подходищие условия
                             if ($(b_tab_null).length>0) {
-                                thisV.prPanelMove=true;
-                                $(b_tab_null).append($(b_tab).find('div.TabOLAPPanelAction'))
-                                             .append($(b_tab).find('div.TabOLAPPol'));
-                                $(b_tab_null).find('div.TabOLAPPol ul.tableOLAP').html(thisV.getUlTabPol());
+                                let tabOLAPPanelAction=$(b_tab).find('div.TabOLAPPanelAction');
+                                if ($(tabOLAPPanelAction).length>0) {
+                                  thisV.prPanelMove=true;
+                                  $(b_tab_null).append('<div class="TabOLAPPanelAction">'+thisV.panel[0].childNodes[0].innerHTML+'</div>')
+                                               .append('<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>');
+                                }
                             }
                         }
                         else {
@@ -1718,12 +1723,8 @@ class TableOLAP extends React.Component {
                 return null;
               }
               else {
-                return <div className="TabOLAPPol" id={id}>
-                        <div style={{position: 'relative'}}>
-                          <a className="TabOLAPPol" id={id} draggable="true">Поля&#9660;</a>
-                          <ul className="tableOLAP dbl-border" id={id} dangerouslySetInnerHTML={{ __html:  ulBlock }}></ul>
-                        </div>
-                      </div>
+                return <div className="TabOLAPPol" dangerouslySetInnerHTML={{ __html:  ulBlock }}>
+                       </div>
               }
             }
             let tabHtml;
