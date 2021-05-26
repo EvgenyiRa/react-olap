@@ -31,6 +31,7 @@ class TableOLAP extends React.Component {
           data:this.props.obj.data,
           strgrouping:(!!this.props.obj.strgrouping)?this.props.obj.strgrouping:{apply:false},
           itogAll:(!!this.props.obj.itogAll)?this.props.obj.itogAll:{apply:false},
+          prRun:false
         };
 
         //переменная отображения графика
@@ -606,6 +607,10 @@ class TableOLAP extends React.Component {
     }
 
     dragDrop(ev) {
+      if (this.state.prRun) {
+          //блокируем перетаскивание во время запроса данных
+          return false;
+      }
       const thisV=this;
       //пришедший ID
       const idIn=ev.originalEvent.dataTransfer.getData("Text");
@@ -715,109 +720,114 @@ class TableOLAP extends React.Component {
     }
 
     getDataSQL() {
-      const data=this.state.data;
-      data.tab_id= this.props.obj.id;
-      let thisV=this;
-      const time00=performance.now();
-      if (!!this.props.obj.stateLoadObj) {
-          this.props.obj.stateLoadObj.current.handleShow();
-      }
-
-      //подготавливаем SQL согласно возможным существующим параметрам
-      const dataCalc = {};
-      dataCalc.params={};
-      //let resp_data;
-      if (!!this.props.obj.data.params_val) {
-          data.params=this.props.obj.data.params_val;
-      }
-      dataCalc.sql=this.props.obj.data.sql_true;
-      getParamForSQL(this.props.obj.paramGroup,this.props.obj.parParentID,dataCalc);
-
-      //забираем полученный SQL и параметры
-      data.sql_true=dataCalc.sql;
-      data.params_val=dataCalc.params;
-
-      //console.log(parSQL);
-      if (!!this.props.obj.beforeLoadData) {
-          this.props.obj.beforeLoadData(this,data);
-      }
-      if (!((!!this.props.obj.beforeLoadData) && (typeof data.error === 'boolean'))) {
-        const dataIn={data:data};
-        if (!!this.state.tabname) {
-            dataIn.tabname=this.state.tabname;
-            dataIn.countall=this.state.countall;
+      if (!this.state.prRun) {
+        //не допускаем повторного запуска не дождавшись окончания предыдущего
+        const data=this.state.data;
+        data.tab_id= this.props.obj.id;
+        let thisV=this;
+        const time00=performance.now();
+        if (!!this.props.obj.stateLoadObj) {
+            this.props.obj.stateLoadObj.current.handleShow();
         }
-        const time00 = performance.now();
-        getTableOLAP(dataIn,(response)=> {
-                        console.log(response);
-                        const data=response;
-                        const time01 = performance.now();
-                        console.log('Время получения данных '+secondstotime(time01,time00));
-                        if (!!thisV.props.obj.stateLoadObj) {
-                            if (thisV.props.obj.stateLoadObj.current!==null) {
-                              thisV.props.obj.stateLoadObj.current.handleHide();
-                            }
-                        }
 
-                        let b_tab=$(".divForTableOLAP[id='"+thisV.props.obj.id+"']");
-                        data.tab_html=$(data.tab_html);
-                        let b_tab_null=$(data.tab_html).find("tr.tr_pok.null td.null");
-                        thisV.setState({prPanelMove:false});
-                        if ((!!thisV.props.obj.addRow) || (!!thisV.props.obj.deleteRow) || (!!thisV.props.obj.dopAction) || (!!thisV.props.obj.editRow) || (thisV.graf)) {
-                            //перемещаем панель действий в подходящее место, если есть подходищие условия
-                            if ($(b_tab_null).length>0) {
-                              let tabOLAPPanelAction=$(b_tab).find('div.TabOLAPPanelAction');
-                              if ($(tabOLAPPanelAction).length>0) {
-                                thisV.prPanelMove=true;
-                                $(tabOLAPPanelAction).remove();
-                                $(b_tab_null).append('<div class="TabOLAPPanelAction">'+thisV.panel[0].childNodes[0].innerHTML+'</div>')
-                                             .append('<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>');
+        //подготавливаем SQL согласно возможным существующим параметрам
+        const dataCalc = {};
+        dataCalc.params={};
+        //let resp_data;
+        if (!!this.props.obj.data.params_val) {
+            data.params=this.props.obj.data.params_val;
+        }
+        dataCalc.sql=this.props.obj.data.sql_true;
+        getParamForSQL(this.props.obj.paramGroup,this.props.obj.parParentID,dataCalc);
+
+        //забираем полученный SQL и параметры
+        data.sql_true=dataCalc.sql;
+        data.params_val=dataCalc.params;
+
+        //console.log(parSQL);
+        if (!!this.props.obj.beforeLoadData) {
+            this.props.obj.beforeLoadData(this,data);
+        }
+        if (!((!!this.props.obj.beforeLoadData) && (typeof data.error === 'boolean'))) {
+          const dataIn={data:data};
+          if (!!this.state.tabname) {
+              dataIn.tabname=this.state.tabname;
+              dataIn.countall=this.state.countall;
+          }
+          const time00 = performance.now();
+          thisV.setState({prRun:true});
+          getTableOLAP(dataIn,(response)=> {
+                          console.log(response);
+                          const data=response;
+                          const time01 = performance.now();
+                          console.log('Время получения данных '+secondstotime(time01,time00));
+                          if (!!thisV.props.obj.stateLoadObj) {
+                              if (thisV.props.obj.stateLoadObj.current!==null) {
+                                thisV.props.obj.stateLoadObj.current.handleHide();
+                              }
+                          }
+
+                          let b_tab=$(".divForTableOLAP[id='"+thisV.props.obj.id+"']");
+                          data.tab_html=$(data.tab_html);
+                          let b_tab_null=$(data.tab_html).find("tr.tr_pok.null td.null");
+                          thisV.prPanelMove=false;
+                          if ((!!thisV.props.obj.addRow) || (!!thisV.props.obj.deleteRow) || (!!thisV.props.obj.dopAction) || (!!thisV.props.obj.editRow) || (thisV.graf)) {
+                              //перемещаем панель действий в подходящее место, если есть подходищие условия
+                              if ($(b_tab_null).length>0) {
+                                let tabOLAPPanelAction=$(b_tab).find('div.TabOLAPPanelAction');
+                                if ($(tabOLAPPanelAction).length>0) {
+                                  thisV.prPanelMove=true;
+                                  $(tabOLAPPanelAction).remove();
+                                  $(b_tab_null).append('<div class="TabOLAPPanelAction">'+thisV.panel[0].childNodes[0].innerHTML+'</div>')
+                                               .append('<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>');
+                                }
+                              }
+                          }
+                          else {
+                            $(b_tab).find('div.TabOLAPPol').remove();
+                            if (+data.countall>0) {
+                              const tabOLAPPol='<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>';
+                              if ($(b_tab_null).length>0) {
+                                  thisV.prPanelMove=true;
+                                  $(b_tab_null).append(tabOLAPPol);
                               }
                             }
-                        }
-                        else {
-                          $(b_tab).find('div.TabOLAPPol').remove();
-                          if (+data.countall>0) {
-                            const tabOLAPPol='<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>';
-                            if ($(b_tab_null).length>0) {
-                                thisV.prPanelMove=true;
-                                $(b_tab_null).append(tabOLAPPol);
+                          }
+                          const newObj={items:data.tab_html[0].outerHTML,
+                                          itemsStrgrouping:undefined,
+                                          $itemsStrgrouping:undefined,
+                                          $itemsStrgroupingBeg:undefined,
+                                          tabname:data.tabname,
+                                          countall:data.countall},
+                                dbtype=getDBType();
+                          if (dbtype==='mssql') {
+                            if (+data.countall===0) {
+                                //для MSSQL не создается таблица если нет строк
+                                newObj.tabname=undefined;
                             }
                           }
-                        }
-                        const newObj={items:data.tab_html[0].outerHTML,
-                                        itemsStrgrouping:undefined,
-                                        $itemsStrgrouping:undefined,
-                                        $itemsStrgroupingBeg:undefined,
-                                        tabname:data.tabname,
-                                        countall:data.countall},
-                              dbtype=getDBType();
-                        if (dbtype==='mssql') {
-                          if (+data.countall===0) {
-                              //для MSSQL не создается таблица если нет строк
-                              newObj.tabname=undefined;
+                          thisV.setState(newObj);
+                          if (!!thisV.props.obj.beforeGrouping) {
+                              thisV.props.obj.beforeGrouping(thisV);
                           }
-                        }
-                        thisV.setState(newObj);
-                        if (!!thisV.props.obj.beforeGrouping) {
-                            thisV.props.obj.beforeGrouping(thisV);
-                        }
-                        thisV.getStrgrouping();
-                        if (!!thisV.props.obj.afterGrouping) {
-                            thisV.props.obj.afterGrouping(thisV);
-                        }
-                        const time02 = performance.now();
-                        console.log('Время обработки данных '+secondstotime(time02,time01));
-                        console.log('Общее время '+secondstotime(time02,time00));
+                          thisV.getStrgrouping();
+                          if (!!thisV.props.obj.afterGrouping) {
+                              thisV.props.obj.afterGrouping(thisV);
+                          }
+                          const time02 = performance.now();
+                          console.log('Время обработки данных '+secondstotime(time02,time01));
+                          console.log('Общее время '+secondstotime(time02,time00));
 
-                        if (!!thisV.props.obj.afterLoadData) {
-                            thisV.props.obj.afterLoadData(thisV,data);
-                        }
-                      },
-                 this.props.obj.stateLoadObj
-               );
+                          if (!!thisV.props.obj.afterLoadData) {
+                              thisV.props.obj.afterLoadData(thisV,data);
+                          }
+                          thisV.setState({prRun:false});
+                        },
+                   this.props.obj.stateLoadObj
+                 );
 
 
+        }
       }
     }
 
@@ -870,6 +880,10 @@ class TableOLAP extends React.Component {
 
         //события контекстного меню
         $("div#root").on('contextmenu', "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_val_name",function(e) {
+          if (thisV.state.prRun) {
+              //блокируем во время запроса данных
+              return false;
+          }
           e.preventDefault();
           //определяем текущее значение
           const idC=$(this).attr('id');

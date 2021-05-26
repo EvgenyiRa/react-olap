@@ -505,8 +505,10 @@ function Users() {
           tab_val: [{"SYSNAME":"VALUE","NAME":"Значение","AGGR":"MAX"}]
         },
     componentDidMount:(thisV)=> {
-        //переопределяем, т.к. по-умолчанию первый раз запращиваются данные только если нет параметров для запроса
+      if ((!!!thisV.state.tabname) & (!thisV.state.prRun)) {
+        //костыль, хз почему 2 раза иногда срабатывает
         thisV.getDataSQL();
+      }
     },
     //отображение действия построения графика (по-умолчанию false)
     graf:true,
