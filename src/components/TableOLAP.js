@@ -762,26 +762,41 @@ class TableOLAP extends React.Component {
                         let b_tab=$(".divForTableOLAP[id='"+thisV.props.obj.id+"']");
                         data.tab_html=$(data.tab_html);
                         let b_tab_null=$(data.tab_html).find("tr.tr_pok.null td.null");
-                        if ((!!thisV.props.obj.addRow) || (!!thisV.props.obj.deleteRow) || (!!thisV.props.obj.dopAction) || (!!thisV.props.obj.editRow) || (this.graf)) {
+                        thisV.prPanelMove=false;
+                        if ((!!thisV.props.obj.addRow) || (!!thisV.props.obj.deleteRow) || (!!thisV.props.obj.dopAction) || (!!thisV.props.obj.editRow) || (thisV.graf)) {
                             //перемещаем панель действий в подходящее место, если есть подходищие условия
                             if ($(b_tab_null).length>0) {
-                                let tabOLAPPanelAction=$(b_tab).find('div.TabOLAPPanelAction');
-                                if ($(tabOLAPPanelAction).length>0) {
-                                  thisV.prPanelMove=true;
-                                  $(b_tab_null).append('<div class="TabOLAPPanelAction">'+thisV.panel[0].childNodes[0].innerHTML+'</div>')
-                                               .append('<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>');
-                                }
+                              let tabOLAPPanelAction=$(b_tab).find('div.TabOLAPPanelAction');
+                              if ($(tabOLAPPanelAction).length>0) {
+                                thisV.prPanelMove=true;
+                                $(tabOLAPPanelAction).remove();
+                                $(b_tab_null).append('<div class="TabOLAPPanelAction">'+thisV.panel[0].childNodes[0].innerHTML+'</div>')
+                                             .append('<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>');
+                              }
                             }
                         }
                         else {
-                          $(b_tab).find('div.TabOLAPPol').html(thisV.getUlTabPol());
+                          $(b_tab).find('div.TabOLAPPol').remove();
+                          const tabOLAPPol='<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>';
+                          if ($(b_tab_null).length>0) {
+                              thisV.prPanelMove=true;
+                              $(b_tab_null).append(tabOLAPPol);
+                          }
                         }
-                        thisV.setState({items:data.tab_html[0].outerHTML,
+                        const newObj={items:data.tab_html[0].outerHTML,
                                         itemsStrgrouping:undefined,
                                         $itemsStrgrouping:undefined,
                                         $itemsStrgroupingBeg:undefined,
                                         tabname:data.tabname,
-                                        countall:data.countall});
+                                        countall:data.countall},
+                              dbtype=getDBType();
+                        if (dbtype==='mssql') {
+                          if (+data.countall===0) {
+                              //для MSSQL не создается таблица если нет строк
+                              newObj.tabname=undefined;
+                          }
+                        }
+                        thisV.setState(newObj);
                         if (!!thisV.props.obj.beforeGrouping) {
                             thisV.props.obj.beforeGrouping(thisV);
                         }

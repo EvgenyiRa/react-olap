@@ -10,7 +10,7 @@ class InputBC extends React.Component {
         isValid:(typeof this.props.obj.isValid==='boolean')?this.props.obj.isValid:false,
         isInvalid:(typeof this.props.obj.isInvalid==='boolean')?this.props.obj.isInvalid:false,
         invalidText:(!!this.props.obj.invalidText)?this.props.obj.invalidText:'',
-        validText:(!!this.props.obj.validText)?this.props.obj.validText:'', 
+        validText:(!!this.props.obj.validText)?this.props.obj.validText:'',
         readOnly:(!!this.props.obj.readOnly)?this.props.obj.readOnly:false,
         type:(!!this.props.obj.type)?this.props.obj.type:'text',
         placeholder:'Введите значение',
@@ -52,6 +52,11 @@ class InputBC extends React.Component {
                         }
                         else {
                           this.setState({value:event.target.value});
+                        }
+                     }}
+            onBlur={(event) => {
+                        if (!!this.props.obj.onBlur) {
+                            this.props.obj.onBlur(event,this);
                         }
                      }}
           />

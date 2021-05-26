@@ -29,10 +29,9 @@ function CalcOLAP() {
     id:"begDate",
     paramGroupV:paramGroupV,
     setParamGroupV:setParamGroupV,
-    onChange:(event,thisV) => {
+    onBlur:(event,thisV) => {
         const valueL=event.target.value;
         thisV.props.obj.setParamGroupV({begDate:valueL,endDate:thisV.props.obj.paramGroupV.endDate});
-        thisV.setState({value:valueL});
     },
     type:'date',
     defaultValue:paramGroupV.begDate
@@ -43,10 +42,9 @@ function CalcOLAP() {
     id:"endDate",
     paramGroupV:paramGroupV,
     setParamGroupV:setParamGroupV,
-    onChange:(event,thisV) => {
+    onBlur:(event,thisV) => {
         const valueL=event.target.value;
         thisV.props.obj.setParamGroupV({begDate:thisV.props.obj.paramGroupV.begDate,endDate:valueL});
-        thisV.setState({value:valueL});
     },
     type:'date',
     defaultValue:paramGroupV.endDate
@@ -59,14 +57,17 @@ function CalcOLAP() {
     setParamGroup:setParamGroupV,
     parParentID:['begDate','endDate'],
     data:{params_val: {},
-          sql_true: `WITH T AS (
+          sql_true: `SET DATEFORMAT YMD;
+                     WITH T AS (
                       SELECT *
-                       FROM TABLE(REP_CALC_OLAP.GET_ROWS(:begDate,:endDate))
+                       FROM [REP_CALC_OLAP]
+                      WHERE INVOICE_DATE >= @begDate
+                        AND INVOICE_DATE <= @endDate
                       )
                       SELECT contract_refid
                              ,jur_ls_refid
                              ,payer_sname
-                             ,'1.'||service service
+                             ,/*'1.'||*/service service
                              ,calc_volume
                              ,0 calc_cost
                              ,calc_net
@@ -74,7 +75,7 @@ function CalcOLAP() {
                              ,VAT_RATE
                              ,1 SORT
                       FROM T
-                      UNION ALL
+                      /*UNION ALL
                       SELECT contract_refid
                              ,jur_ls_refid
                              ,payer_sname
@@ -90,7 +91,7 @@ function CalcOLAP() {
                              ,jur_ls_refid
                              ,payer_sname
                              ,tariff
-                             ,VAT_RATE`,
+                             ,VAT_RATE*/`,
           tab_pok: [{"SYSNAME":"SERVICE","NAME":"Услуга"}],
           tab_pol: [],
           tab_str: [{"SYSNAME":"TARIFF","NAME":"Цена за ед.,<br>руб."},{"SYSNAME":"PAYER_SNAME","NAME":"Контрагент"},
@@ -201,9 +202,9 @@ function CalcOLAP() {
     graf:true,
     grafFilter:(items)=>{
       $(items).find('td.td_pok:last,td.td_val_val:last-child,td.td_val_val:nth-last-child(2),td.td_val_name:last-child,td.td_val_name:nth-last-child(2)').remove();
-      $(items).find('td.td_pok').each(function(i,elem) {
+      /*$(items).find('td.td_pok').each(function(i,elem) {
           $(elem).html($(elem).text().split('.')[1]);
-      });
+      });*/
       return items;
     },
     /*beforeGrouping:(thisV)=> {
@@ -213,10 +214,10 @@ function CalcOLAP() {
         let tabV=thisV.state.$itemsStrgrouping,
             tabB=thisV.state.$itemsStrgroupingBeg;
         if (typeof tabV!=='undefined') {
-          $(tabV).find('td.td_pok').each(function(i,elem) {
+          /*$(tabV).find('td.td_pok').each(function(i,elem) {
               $(elem).html($(elem).text().split('.')[1]);
           });
-          $(tabV).find('td.td_pok:last,td.td_val_val:last-child,td.td_val_val:nth-last-child(2)').css({'filter': 'invert(0.05)'});
+          $(tabV).find('td.td_pok:last,td.td_val_val:last-child,td.td_val_val:nth-last-child(2)').css({'filter': 'invert(0.05)'});*/
 
           const addItogRight=(tabF)=>{
             $(tabF).find('td.td_val_val').each(function(i,elem) {
@@ -226,7 +227,7 @@ function CalcOLAP() {
                 }
             });
             //запоминаем все текущие значения полей
-            /*let tdValName=$(tabF).find('tr.tr_name_col td.td_val_name'),
+            let tdValName=$(tabF).find('tr.tr_name_col td.td_val_name'),
                 tdValNameUniq=[],
                 tdValNameElUniq=[];
             //оставляем уникальные
@@ -253,7 +254,7 @@ function CalcOLAP() {
                 });
                 $(elem).find('td:last').after('<td class="td_val_val_itog" id="'+elem2+'">'+sumStr.toFixed(2)+'</td>');
               });
-            });*/
+            });
             return tabF;
           }
           tabB=addItogRight(tabB);
