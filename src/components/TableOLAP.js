@@ -762,7 +762,7 @@ class TableOLAP extends React.Component {
                         let b_tab=$(".divForTableOLAP[id='"+thisV.props.obj.id+"']");
                         data.tab_html=$(data.tab_html);
                         let b_tab_null=$(data.tab_html).find("tr.tr_pok.null td.null");
-                        thisV.prPanelMove=false;
+                        thisV.setState({prPanelMove:false});
                         if ((!!thisV.props.obj.addRow) || (!!thisV.props.obj.deleteRow) || (!!thisV.props.obj.dopAction) || (!!thisV.props.obj.editRow) || (thisV.graf)) {
                             //перемещаем панель действий в подходящее место, если есть подходищие условия
                             if ($(b_tab_null).length>0) {
@@ -777,10 +777,12 @@ class TableOLAP extends React.Component {
                         }
                         else {
                           $(b_tab).find('div.TabOLAPPol').remove();
-                          const tabOLAPPol='<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>';
-                          if ($(b_tab_null).length>0) {
-                              thisV.prPanelMove=true;
-                              $(b_tab_null).append(tabOLAPPol);
+                          if (+data.countall>0) {
+                            const tabOLAPPol='<div class="TabOLAPPol">'+thisV.getUlTabPol()+'</div>';
+                            if ($(b_tab_null).length>0) {
+                                thisV.prPanelMove=true;
+                                $(b_tab_null).append(tabOLAPPol);
+                            }
                           }
                         }
                         const newObj={items:data.tab_html[0].outerHTML,
@@ -1738,8 +1740,13 @@ class TableOLAP extends React.Component {
                 return null;
               }
               else {
-                return <div className="TabOLAPPol" dangerouslySetInnerHTML={{ __html:  ulBlock }}>
-                       </div>
+                if (this.countall>0) {
+                  return <div className="TabOLAPPol" dangerouslySetInnerHTML={{ __html:  ulBlock }}>
+                         </div>
+                }
+                else {
+                  return null;
+                }
               }
             }
             let tabHtml;
