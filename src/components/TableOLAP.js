@@ -587,6 +587,9 @@ class TableOLAP extends React.Component {
        if ($(ev.target).is('a.TabOLAPPol')) {
           ev.originalEvent.dataTransfer.setData("Text", 'nodrag');
        }
+       else if ($(ev.target).is('div.td_pok_name')) {
+          ev.originalEvent.dataTransfer.setData("Text", 'nodrag');
+       }
        else {
          ev.originalEvent.dataTransfer.setData("Text", ev.target.getAttribute('id'));
        }
@@ -629,7 +632,7 @@ class TableOLAP extends React.Component {
       //console.log(elIn);
       //текущий элемент
       let elOut=$(ev.target);
-      if ((!$(elOut).is('a.TabOLAPPol')) & ((!$(elOut).is('td')))) {
+      if ((!$(elOut).is('a.TabOLAPPol')) & (!$(elOut).is('div.td_pok_name')) & ((!$(elOut).is('td')))) {
           elOut=$(elOut).closest('td');
       }
       const idOut=$(elOut).attr('id');
@@ -678,7 +681,7 @@ class TableOLAP extends React.Component {
       function addOut(type) {
           //добавляем туда, куда отправили
           const newEl={"SYSNAME":idIn,"NAME":$(elIn).text().trim()}
-          if (type!=='tab_pol') {
+          if ((type!=='tab_pol') & (type!=='tab_pok')) {
             for (var i = 0; i < dataNew[type].length; i++) {
               if (dataNew[type][i].SYSNAME===idOut) {
                 if (type==='tab_val') {
@@ -695,7 +698,10 @@ class TableOLAP extends React.Component {
             }
           }
           else {
-              dataNew['tab_pol'].push(newEl);
+              if (!!!dataNew[type]) {
+                  dataNew[type]=[];
+              }
+              dataNew[type].push(newEl);
           }
       }
 
@@ -858,16 +864,19 @@ class TableOLAP extends React.Component {
                                       "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_str_name,"+
                                       "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_val_name,"+
                                       "a.TabOLAPPol[id='"+this.props.obj.id+"'],"+
-                                      "ul.tableOLAP[id='"+this.props.obj.id+"'] li.liTableOLAP", this.dragEnter);
+                                      "ul.tableOLAP[id='"+this.props.obj.id+"'] li.liTableOLAP,"+
+                                      "div.divTableOLAP.td_pok_name[id='"+this.props.obj.id+"']", this.dragEnter);
         $("div#root").on('dragover', "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_pok_name,"+
                                       "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_str_name,"+
                                       "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_val_name,"+
                                       "a.TabOLAPPol[id='"+this.props.obj.id+"'],"+
-                                      "ul.tableOLAP[id='"+this.props.obj.id+"'] li.liTableOLAP", this.dragOver);
+                                      "ul.tableOLAP[id='"+this.props.obj.id+"'] li.liTableOLAP,"+
+                                      "div.divTableOLAP.td_pok_name[id='"+this.props.obj.id+"']", this.dragOver);
         $("div#root").on('drop', "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_pok_name,"+
                                       "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_str_name,"+
                                       "table.tableOLAP[id='"+this.props.obj.id+"'] tbody tr td.td_val_name,"+
-                                      "a.TabOLAPPol[id='"+this.props.obj.id+"']", this.dragDrop);
+                                      "a.TabOLAPPol[id='"+this.props.obj.id+"'],"+
+                                      "div.divTableOLAP.td_pok_name[id='"+this.props.obj.id+"']", this.dragDrop);
         $("div#root").on('click', "a.TabOLAPPol[id='"+this.props.obj.id+"']",function() {
             const elNext=$(this).next();
             if ($(elNext).is(':visible')) {
@@ -1763,6 +1772,30 @@ class TableOLAP extends React.Component {
                 }
               }
             }
+            const dopBlockPok=() => {
+              let prVis=false;
+              if (!!!this.state.data.tab_pok) {
+                  prVis=true;
+              }
+              else if (this.state.data.tab_pok.length===0) {
+                prVis=true;
+              }
+              if (!prVis) {
+                return null;
+              }
+              else {
+                return <div className="divTableOLAP td_pok_name" draggable="true" id={id}
+                            style={{border:'1px solid black',
+                                    width: 'fit-content',
+                                    padding: '0.1em 0.3em',
+                                    borderRadius: '0.3em',
+                                    display: 'inline-block',
+                                    marginLeft: '3em'
+                                  }}
+                            title="Перетащите сюда элемент из другого измерения при необходимости"
+                        >Измерение показателей</div>;
+              }
+            }
             let tabHtml;
             if (!!this.state.itemsStrgrouping) {
               tabHtml=this.state.itemsStrgrouping;
@@ -1775,6 +1808,7 @@ class TableOLAP extends React.Component {
                       </div>
                       {panelBlock()}
                       {tabOLAPPol()}
+                      {dopBlockPok()}
                       <table id={id} className={'tableOLAP'+((!!className)?' '+className:'')} dangerouslySetInnerHTML={{ __html:tabHtml }}>
                       </table>
                    </div>;
