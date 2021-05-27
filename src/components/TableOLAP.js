@@ -647,7 +647,7 @@ class TableOLAP extends React.Component {
       let elInIndex,elInCat;
       function delIn(type) {
         elInCat=type;
-        if ((dataNew[type].length>1) || (type==='tab_pol')) {
+        if ((dataNew[type].length>1) || (type==='tab_pol') || (type==='tab_pok')) {
           //удаляем из места объекта где находился, только если таких значений больше одного (чтобы строилось корректно и не делать доп.функционал+надежность)
           for (var i = 0; i < dataNew[type].length; i++) {
             if (dataNew[type][i].SYSNAME===idIn) {
@@ -1754,7 +1754,7 @@ class TableOLAP extends React.Component {
                 return null;
               }
               else {
-                if (this.countall>0) {
+                if (this.state.countall>0) {
                   return <div className="TabOLAPPol" dangerouslySetInnerHTML={{ __html:  ulBlock }}>
                          </div>
                 }
