@@ -83,7 +83,17 @@ export function getReportServerConfigs(callback) {
       }
     }
     else if (dbtype==='mssql') {
-        callback('def',reportServer);
+        if (!!!axiosInstance) {
+          var MyInt= setInterval(function(){
+              if (!!axiosInstance) {
+                clearInterval (MyInt);
+                callback('def',reportServer);
+              }
+          },500);
+        }
+        else {
+          callback('def',reportServer);
+        }
     }
   }
 }
