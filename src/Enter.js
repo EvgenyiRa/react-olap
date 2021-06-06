@@ -40,18 +40,20 @@ function Enter({setIsAuth}) {
   }
 
   return(
-    <div className="loginContainer">
-      <div id="login" className="login">
-          <h2>Авторизация</h2>
-          <div className="divUsrPwd">
-            <img htmlFor="user" className="icon-user" src={EnterLogin} title="Логин" alt="Логин" />
-            <input className="user" id="user" />
-            <img htmlFor="password" className="icon-user" src={EnterPassword} title="Пароль" alt="Пароль"/>
-            <input type="password" className="password" id="password" />
-            <label htmlFor="remember"><input type="checkbox" id="remember" /><span className="remember"/>Запомнить меня</label>
-            <input type="submit" value="Войти" className="but_enter" onClick={()=>butEnterClick()}/>
-            <label style={{position:'absolute',top: '7.5rem',color:'white',left:'7%',fontSize:'14px',textShadow: '0 1px red'}}>{resultAuth}</label>
-          </div>
+    <div className="backgroundContainer">
+      <div className="loginContainer">
+        <div id="login" className="login">
+            <h2>Авторизация</h2>
+            <div className="divUsrPwd">
+              <img htmlFor="user" className="icon-user" src={EnterLogin} title="Логин" alt="Логин" />
+              <input className="user" id="user" />
+              <img htmlFor="password" className="icon-user" src={EnterPassword} title="Пароль" alt="Пароль"/>
+              <input type="password" className="password" id="password" />
+              <label htmlFor="remember"><input type="checkbox" id="remember" /><span className="remember"/>Запомнить меня</label>
+              <input type="submit" value="Войти" className="but_enter" onClick={()=>butEnterClick()}/>
+              <label style={{position:'absolute',top: '7.5rem',color:'white',left:'7%',fontSize:'14px',textShadow: '0 1px red'}}>{resultAuth}</label>
+            </div>
+        </div>
       </div>
     </div>
   );

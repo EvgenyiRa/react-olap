@@ -35,15 +35,6 @@ const Aside = ({ image, collapsed, rtl, toggled, handleToggleSidebar,handleColla
       setIsAuth(false);
   }
 
-  const IconAb=() => {
-      return <img src={require('./img/ab.svg').default} alt="ab" style={{width:'auto',height:'2.7em',marginLeft:'0.2em',marginRight:'0.5em'}}/>;
-  }
-
-  const IconAdmin=() => {
-    return <img src={require('./img/admin.svg').default} alt="admin" style={{width:'auto',height:'2.3em',marginLeft:'0.5em',marginRight:'0.5em'}}/>
-  }
-
-
   return (
     <ProSidebar
       image={image ? sidebarBg : false}
