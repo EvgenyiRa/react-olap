@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { CgMenuRound } from 'react-icons/cg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import rvkLogo from './assets/logo.png';
+import logo from './img/logo.png';
 
 import Admin_users from './forms/admin/Users';
 import CalcOLAP from './forms/CalcOLAP';
@@ -27,10 +27,10 @@ const Main = ({
 
 
   const Home = () => (
-    <div>
+    <div style={{padding:'3em'}}>
       <header>
         <h1>
-          <img width={80} src={rvkLogo} alt="WEB-OLAO logo" /> {intl.formatMessage({ id: 'title' })}
+          <img width={80} src={logo} alt="WEB-OLAO logo" /> {intl.formatMessage({ id: 'title' })}
         </h1>
         <p>{intl.formatMessage({ id: 'description' })}</p>
 
@@ -47,6 +47,9 @@ const Main = ({
         <CgMenuRound />
       </div>
 
+      <Switch>
+        <Route exact path='/' component={Home}/>
+      </Switch>
       <Switch>
           <Route exact path='/admin' component={Admin_users}/>
       </Switch>

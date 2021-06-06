@@ -1,7 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom'
 import { useIntl } from 'react-intl';
-import rvkLogo from './assets/logo.png';
 import {
   ProSidebar,
   Menu,
