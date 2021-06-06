@@ -1,4 +1,0 @@
-{
-    "dataServer": "${REACT_APP_DATA_SERVER}",
-    "reportServer": "${REACT_APP_REPORT_SERVER}"
-}

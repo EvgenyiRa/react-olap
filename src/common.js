@@ -1,37 +1,37 @@
 import axios from "axios";
-import {settings} from './config.js';
 import $ from 'jquery'
 
 let dataServer,
-    reportServer,
-    prVisiteReportServer=false,
-    reportServerHost,
-    axiosInstance,
     userInfo,
     tagExit=false,
-    dbtype='ora',
-    prErrorData=false;
+    dbtype='mssql',
+    prErrorData=false,
+    axiosInstance;
 
-const houreLifeCookies = 8,
-      idsLKKbyCity={vrn:1,
-                    omk:2,
-                    orn:3,
-                    krnd:4,
-                    brnl:5,
-                    tmn:6,
-                    arhk:7};
-export { houreLifeCookies,idsLKKbyCity };
-
-settings.then(function(settings){
-  dataServer=settings.dataServer;
-  reportServer=settings.reportServer;
-  if (!!settings.dbtype) {
-      dbtype=settings.dbtype;
+//получаем файл конфигурации
+$.ajax({
+  type: "GET",
+  url: '/config.json',
+  //dataType:'json',
+  async:false,
+  success: function(data) {
+    dataServer=data.dataServer;
+    if (!!data.dbtype) {
+      dbtype=data.dbtype;
+    }
+    axiosInstance= axios.create({
+      baseURL: data.dataServer
+    });
+  },
+  error: function(xhr, status, error) {
+      alert("Не удалось прочитать файл конфигурации");
+      console.log(xhr.responseText + '|\n' + status + '|\n' +error);
   }
-  axiosInstance = axios.create({
-    baseURL: dataServer
-  });
 });
+
+const houreLifeCookies = 8;
+export { houreLifeCookies };
+
 
 function setDataError() {
   if (!prErrorData) {
@@ -56,203 +56,7 @@ export function getTagExit() {
   return tagExit;
 }
 
-export function getReportServerConfigs(callback) {
-  if (!!reportServerHost) {
-      callback(reportServerHost,reportServer);
-  }
-  else {
-    if (dbtype==='ora') {
-      function axiosInstanceFunc() {
-        let data0 = {};
-        data0.sql=`SELECT sys_context('USERENV', 'SERVER_HOST')  SERVER_HOST FROM dual`;
-        getQuery(data0,(response0)=> {
-            reportServerHost=response0.data[0].SERVER_HOST;
-            callback(reportServerHost,reportServer);
-        })
-      }
-      if (!!!axiosInstance) {
-        var MyInt= setInterval(function(){
-            if (!!axiosInstance) {
-              clearInterval (MyInt);
-              axiosInstanceFunc();
-            }
-        },500);
-      }
-      else {
-        axiosInstanceFunc();
-      }
-    }
-    else if (dbtype==='mssql') {
-        if (!!!axiosInstance) {
-          var MyInt= setInterval(function(){
-              if (!!axiosInstance) {
-                clearInterval (MyInt);
-                callback('def',reportServer);
-              }
-          },500);
-        }
-        else {
-          callback('def',reportServer);
-        }
-    }
-  }
-}
-
-/*const axiosReportInstance = axios.create({
-  baseURL: reportServer
-});*/
 let token;
-
-export function setTokenReportServer(params,callback) {
-  getReportServerConfigs((reportServerHost,reportServer) => {
-    var data = {};
-    if (dbtype==='ora') {
-      data.exec_params_in={};
-      //data.query_params={};
-      data.execsql=`Declare
-                        p_token    VARCHAR2(32);
-                        p_id       NUMBER;
-                     BEGIN
-                        SELECT sys_guid() INTO p_token FROM dual;
-                        SELECT web_token_id_sq.nextval INTO p_id FROM dual;
-                        DELETE web_token WHERE accdate < (SYSDATE - 1);
-                        COMMIT;
-                        INSERT INTO web_token
-                         (id, parameters_list, guid, DATABASE)
-                        VALUES
-                         (p_id, :parameters_list, p_token, :p_database);
-                        COMMIT;
-                        :params_url:='id='||p_id||'&token='||p_token||'&database='||:p_database;
-                      END;`;
-      data.exec_params_in['p_database']=reportServerHost;
-      if (!!params) {
-          data.exec_params_in['parameters_list']=params;
-      }
-      else {
-          data.exec_params_in['parameters_list']='';
-      }
-      data.exec_params_out=[];
-      data.exec_params_out.push({name:'params_url',type:'string'});
-      getExecQuery(data,
-                   function(response) {
-                     callback(response)
-                   }
-                  );
-    }
-    else if (dbtype==='mssql') {
-      data.params={};
-      //data.query_params={};
-      data.sql=`SET NOCOUNT ON;
-                Declare
-                    @p_token    NVARCHAR(36),
-                    @get_date   datetime,
-                    @p_id       bigint;
-                 BEGIN
-                    SET @p_token = CAST(NEWID() as char(36));
-                    SET @get_date=GETDATE();
-                    DELETE WEB_TOKEN WHERE ACCDATE < DATEADD(day,-1, @get_date);
-                    INSERT INTO web_token
-                     (PARAMETERS_LIST, GUID, ACCDATE)
-                    VALUES
-                     (@parameters_list, @p_token, @get_date);
-                    SELECT @p_id = SCOPE_IDENTITY();
-                    SET @params_url='id='+CAST(@p_id as nvarchar)+'&token='+@p_token;
-                  END;`;
-      if (!!params) {
-          data.params['parameters_list']=params;
-      }
-      else {
-          data.params['parameters_list']='';
-      }
-      data.params_out=[];
-      data.params_out.push({name:'params_url',type:'nvarchar'});
-      getQuery(data,
-               function(response) {
-                 callback(response)
-               }
-              );
-    }
-  });
-}
-
-export function getSQLPlusReport(params,callback,stateLoadObj) {
-  if (!!stateLoadObj) {
-    if (stateLoadObj.current!==null) {
-      stateLoadObj.current.setState((state) => ({vis:++state.vis}));
-    }
-  }
-  getAuth((userInfo)=>{
-            setTokenReportServer(params['forDB'],
-                                  (response)=> {
-                                    $.ajax({
-                                      type: "POST",
-                                      url: reportServer+"/get_file_by_sqlplus.php?"+response.data.execout['params_url']+'&login='+userInfo.login,
-                                      data: params['forReport'],
-                                      dataType:'json',
-                                      success: function(data) {
-                                          if (!!stateLoadObj) {
-                                            if (stateLoadObj.current!==null) {
-                                              stateLoadObj.current.setState((state) => ({vis:--state.vis}));
-                                            }
-                                          }
-                                          data.path_file=reportServer+data.path_file;
-                                          callback(data);
-                                      },
-                                      error: function(xhr, status, error) {
-                                          if (!!stateLoadObj) {
-                                            if (stateLoadObj.current!==null) {
-                                              stateLoadObj.current.setState((state) => ({vis:--state.vis}));
-                                            }
-                                          }
-                                          console.log(xhr.responseText + '|\n' + status + '|\n' +error);
-                                      }
-                                  });
-                                 });
-          }
-          ,stateLoadObj
-        );
-}
-
-export function getReportServerLink(params,callback) {
-  if (typeof params['forDB']!=='string') {
-      params['forDB']='';
-  }
-  getAuth((userInfo)=>{
-            setTokenReportServer(params['forDB'],
-                                  (response)=> {
-                                      if (dbtype==='ora') {
-                                        callback(reportServer+"/client.php?cat_id="+params['cat_id']+"&form_id="+params['form_id']+'&'+response.data.execout['params_url']+'&login='+userInfo.login);
-                                      }
-                                      else if (dbtype==='mssql') {
-                                        callback(reportServer+"/client.php?cat_id="+params['cat_id']+"&form_id="+params['form_id']+'&'+response.output['params_url']+'&login='+userInfo.login);
-                                      }
-                                  }
-                                );
-          }
-        );
-}
-
-export function getReportServer(catID,formID,params) {
-  //создаем токен если не заходили
-  if (!prVisiteReportServer) {
-    let paramsF='cat_id='+catID+'&form_id='+formID;
-    if (!!params) {
-        paramsF+='&react_params='+params;
-    }
-    setTokenReportServer(paramsF,
-                         function(response) {
-                           prVisiteReportServer=true;
-                           const winC=window.open(reportServer+"/print.php?"+response.data.execout['params_url']);
-                        });
-  }
-  else {
-    var react_params='';
-    if (!!params) {
-      react_params='&react_params='+params;
-    }
-    const winC=window.open(reportServer+"/index.php?cat_id="+catID+"&form_id="+formID+react_params);
-  }
-}
 
 export function get_cookie(cookie_name)
 {
@@ -365,7 +169,12 @@ export function getParamForSQL(paramGroup,parParentID,data) {
                   data.sql=data.sql.split(parSimv+item).join(str_for_sql_params);
                 }
                 else {
-                    data.params[item]=null;
+                    if (dbtype==='ora') {
+                        data.params[item]='';
+                    }
+                    else if (dbtype==='mssql') {
+                        data.params[item]=null;
+                    }
                 }
             }
         });
@@ -463,17 +272,7 @@ export function getQuery(data,callback,stateLoadObj) {
           }
         });
       }
-      if (!!!axiosInstance) {
-        var MyInt= setInterval(function(){
-            if (!!axiosInstance) {
-              clearInterval (MyInt);
-              axiosInstanceFunc();
-            }
-        },500);
-      }
-      else {
-        axiosInstanceFunc();
-      }
+      axiosInstanceFunc();
     }
   });
 }
@@ -505,17 +304,7 @@ export function getHashPwd(data,callback,stateLoadObj) {
           }
         });
       }
-      if (!!!axiosInstance) {
-        var MyInt= setInterval(function(){
-            if (!!axiosInstance) {
-              clearInterval (MyInt);
-              axiosInstanceFunc();
-            }
-        },500);
-      }
-      else {
-        axiosInstanceFunc();
-      }
+      axiosInstanceFunc();
     }
   });
 }
@@ -554,17 +343,7 @@ export function getExecQuery(data,callback,stateLoadObj) {
           }
         });
       }
-      if (!!!axiosInstance) {
-        var MyInt= setInterval(function(){
-            if (!!axiosInstance) {
-              clearInterval (MyInt);
-              axiosInstanceFunc();
-            }
-        },500);
-      }
-      else {
-        axiosInstanceFunc();
-      }
+      axiosInstanceFunc();
     }
   });
 }
@@ -601,17 +380,7 @@ export function getAuth(callback,stateLoadObj) {
           }
         });
       }
-      if (!!!axiosInstance) {
-        var MyInt= setInterval(function(){
-            if (!!axiosInstance) {
-              clearInterval (MyInt);
-              axiosInstanceFunc();
-            }
-        },500);
-      }
-      else {
-        axiosInstanceFunc();
-      }
+      axiosInstanceFunc();
     });
   }
 }
@@ -658,59 +427,6 @@ export function getCheckRight(rigth,callback) {
     }
 }
 
-export function setAuthByToken(data,callback) {
-  function axiosInstanceFunc() {
-    axiosInstance.post('/auth/bytoken',data)
-    .then(function(response) {
-      if (response.status !== 200) {
-        console.log('Authentication failed.', response);
-      }
-      if (!!!response.data.message) {
-        set_cookie('auth',response.data.token, houreLifeCookies);
-        token=response.data.token;
-        localStorage.setItem('tokenOne', response.data.tokenOne);
-      }
-      callback(response);
-    });
-  }
-
-  if (!!!axiosInstance) {
-    var MyInt= setInterval(function(){
-        if (!!axiosInstance) {
-          clearInterval (MyInt);
-          axiosInstanceFunc();
-        }
-    },500);
-  }
-  else {
-    axiosInstanceFunc();
-  }
-}
-
-export function createPool(data,callback) {
-  function axiosInstanceFunc() {
-    axiosInstance.post('/auth/createpool',data)
-    .then(function(response) {
-      if (response.status !== 200) {
-        console.log('Create pool failed.', response);
-      }
-      callback(response);
-    });
-  }
-
-  if (!!!axiosInstance) {
-    var MyInt= setInterval(function(){
-        if (!!axiosInstance) {
-          clearInterval (MyInt);
-          axiosInstanceFunc();
-        }
-    },500);
-  }
-  else {
-    axiosInstanceFunc();
-  }
-}
-
 export function getTableOLAP(data,callback,stateLoadObj) {
   getAuthorization(data,function(){
     if (!!stateLoadObj) {
@@ -731,47 +447,6 @@ export function getTableOLAP(data,callback,stateLoadObj) {
           //set_cookie('tokenOne',response.data.tokenOne, houreLifeCookies);
           localStorage.setItem('tokenOne', response.data.tokenOne);
           callback(response.data.object);
-        }
-        else {
-          setDataError();
-        }
-      });
-    }
-    if (!!!axiosInstance) {
-      var MyInt= setInterval(function(){
-          if (!!axiosInstance) {
-            clearInterval (MyInt);
-            axiosInstanceFunc();
-          }
-      },500);
-    }
-    else {
-      axiosInstanceFunc();
-    }
-  });
-}
-
-export function getPrint(data,callback,stateLoadObj) {
-  getAuthorization(data,function(){
-    if (!!stateLoadObj) {
-        stateLoadObj.current.setState((state) => ({vis:++state.vis}));
-    }
-    function axiosInstanceFunc() {
-      axiosInstance.post('/print/'+data.type,data)
-      .then(function(response) {
-        if (response.status !== 200) {
-          console.log('Authentication failed.' + response.status);
-        }
-        if (!!stateLoadObj) {
-          if (stateLoadObj.current!==null) {
-            stateLoadObj.current.setState((state) => ({vis:--state.vis}));
-          }
-        }
-        if (!!!response.data.message) {
-          //set_cookie('tokenOne',response.data.tokenOne, houreLifeCookies);
-          localStorage.setItem('tokenOne', response.data.tokenOne);
-          delete response.data.tokenOne;
-          callback(response.data);
         }
         else {
           setDataError();

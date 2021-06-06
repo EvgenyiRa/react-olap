@@ -79,9 +79,6 @@ const Aside = ({ image, collapsed, rtl, toggled, handleToggleSidebar,handleColla
 
       <SidebarContent>
         <Menu iconShape="circle">
-          <MenuItem>Администрирование
-            <Link to='/web_olap_client/1/2'/>
-          </MenuItem>
           <MenuItem>Администрирование OLAP
             <Link to='/admin'/>
           </MenuItem>

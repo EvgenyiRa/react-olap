@@ -8,7 +8,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import rvkLogo from './assets/logo.png';
 
 import Admin_users from './forms/admin/Users';
-import Web_OLAP_Client from './forms/Web_OLAP_Client';
 import CalcOLAP from './forms/CalcOLAP';
 import {getAuth,getCheckRight} from './common.js';
 
@@ -31,38 +30,12 @@ const Main = ({
     <div>
       <header>
         <h1>
-          <img width={80} src={rvkLogo} alt="rosvodokanal logo" /> {intl.formatMessage({ id: 'title' })}
+          <img width={80} src={rvkLogo} alt="WEB-OLAO logo" /> {intl.formatMessage({ id: 'title' })}
         </h1>
         <p>{intl.formatMessage({ id: 'description' })}</p>
 
       </header>
 
-      {/*<div className="block">
-        <SwitchR
-          height={16}
-          width={30}
-          checkedIcon={false}
-          uncheckedIcon={false}
-          onChange={handleRtlChange}
-          checked={rtl}
-          onColor="#219de9"
-          offColor="#bbbbbb"
-        />
-        <span> {intl.formatMessage({ id: 'rtl' })}</span>
-      </div>
-      <div className="block">
-        <SwitchR
-          height={16}
-          width={30}
-          checkedIcon={false}
-          uncheckedIcon={false}
-          onChange={handleImageChange}
-          checked={image}
-          onColor="#219de9"
-          offColor="#bbbbbb"
-        />
-        <span> {intl.formatMessage({ id: 'image' })}</span>
-      </div>*/}
     </div>
   )
 
@@ -74,10 +47,6 @@ const Main = ({
         <CgMenuRound />
       </div>
 
-      <Switch>
-        <Route exact path='/web_olap_client/:cat_id/:form_id' component={Web_OLAP_Client}/>
-        <Route exact path='/web_olap_client/:cat_id/:form_id/:params' component={Web_OLAP_Client}/>
-      </Switch>
       <Switch>
           <Route exact path='/admin' component={Admin_users}/>
       </Switch>
