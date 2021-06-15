@@ -11,7 +11,7 @@ import { format,startOfMonth } from 'date-fns';
 
 import $ from 'jquery'
 
-import {getExecQuery,getHashPwd,getQuery} from '../common.js';
+import {getExecQuery,getHashPwd,getSQLRun} from '../system.js';
 
 function CalcOLAP() {
   const newDate=new Date();

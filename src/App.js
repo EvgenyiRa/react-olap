@@ -5,7 +5,7 @@ import Layout from './Layout';
 import messages from './messages';
 import './styles/App.scss';
 import Enter from './Enter'
-import {get_cookie} from './common.js';;
+import {get_cookie} from './system.js';;
 
 function App() {
   const [locale, setLocale] = useState('ru');

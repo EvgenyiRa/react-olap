@@ -86,7 +86,6 @@ function set_cookie( name, value, houreLife, path, domain, secure)
 }
 
 export function setAuth(data,callback) {
-  //{"login":process.env.REACT_APP_DSL,"password": process.env.REACT_APP_DSP}
   axiosInstance.post('/auth/set',data)
   .then(function(response) {
     if (response.status !== 200) {
@@ -241,14 +240,14 @@ function getAuthorization(data,callback0) {
   }
 }
 
-export function getQuery(data,callback,stateLoadObj) {
+export function getSQLRun(data,callback,stateLoadObj) {
   getAuthorization(data,function(result){
     if (result) {
       if (!!stateLoadObj) {
           stateLoadObj.current.setState((state) => ({vis:++state.vis}));
       }
       function axiosInstanceFunc() {
-        axiosInstance.post('/'+dbtype+'/query',data)
+        axiosInstance.post('/'+dbtype+'/sqlrun',data)
         .then(function(response) {
           if (response.status !== 200) {
             console.log('Authentication failed.' + response.status);

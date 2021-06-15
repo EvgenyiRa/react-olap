@@ -14,7 +14,7 @@ import Col from 'react-bootstrap/Col';
 
 import $ from 'jquery'
 
-import {getQuery,getHashPwd} from '../../common.js';
+import {getSQLRun,getHashPwd} from '../../system.js';
 
 function Users() {
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
@@ -94,7 +94,7 @@ function Users() {
           data1.params.user_id=data.params['user_id'];
           data1.sql+=` AND USER_ID!=@user_id`;
         }
-        getQuery(data1,(response1)=> {
+        getSQLRun(data1,(response1)=> {
                   if (response1.data[0].COUNT>0) {
                       refInputLogin.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
                   }
@@ -123,7 +123,7 @@ function Users() {
                                      function(response) {
                                        data.params['password']=response.hash;
                                        data.params['sol']=response.sol;
-                                       getQuery(data,
+                                       getSQLRun(data,
                                                     function(response0) {
                                                        const newUsers=[...refSelectUser.current.state.options,{label:data.params['fio'],value:response0.output['user_id']}];
                                                        refSelectUser.current.setState({options:newUsers});
@@ -163,7 +163,7 @@ function Users() {
                                                PHONE=@phone
                                          WHERE USER_ID=@user_id`;
                          function updUser() {
-                           getQuery(data,
+                           getSQLRun(data,
                                         function(response0) {
                                            //находим пользователя в списке, правим фамилию на случай если изменили
                                            const newUsers=[...refSelectUser.current.state.options];
@@ -328,7 +328,7 @@ function Users() {
           data1.params.right_id=data.params['right_id'];
           data1.sql+=` AND RIGHTS_ID!=@right_id`;
         }
-        getQuery(data1,(response1)=> {
+        getSQLRun(data1,(response1)=> {
                   if (response1.data[0].COUNT>0) {
                       refInputRightSysName.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
                   }
@@ -341,7 +341,7 @@ function Users() {
                                     END;`;
                            data.params_out=[];
                            data.params_out.push({name:'right_id',type:'bigint'});
-                           getQuery(data,
+                           getSQLRun(data,
                                         function(response0) {
                                            const newRights=[...refSelectRight.current.state.options,{label:data.params['rightName'],value:response0.output['right_id']}];
                                            refSelectRight.current.setState({options:newRights});
@@ -358,7 +358,7 @@ function Users() {
                         data.sql=`UPDATE REP_RIGHTS
                                      SET NAME=@rightName, SYSNAME=@rightSysName
                                    WHERE RIGHTS_ID=@right_id`;
-                         getQuery(data,
+                         getSQLRun(data,
                                       function(response0) {
                                          const newRights=[...refSelectRight.current.state.options];
                                          for (var i = 0; i < newRights.length; i++) {
@@ -390,7 +390,7 @@ function Users() {
       data1.sql=`SELECT SYSNAME
                    FROM REP_RIGHTS
                   WHERE RIGHTS_ID=@right_id`;
-      getQuery(data1,(response1) => {
+      getSQLRun(data1,(response1) => {
           $('input#'+refInputRightSysName.current.props.obj.id).val(response1.data[0].SYSNAME);
           refInputRightSysName.current.setState({value:response1.data[0].SYSNAME});
       });
@@ -544,7 +544,7 @@ function Users() {
                                                                                 WHERE USER_ID=@user_id;
                                                                               END;`;
                                                                 data.params['user_id']=+user_id;
-                                                                getQuery(data,
+                                                                getSQLRun(data,
                                                                              function(response0) {
                                                                                 //находим пользователя в списке, удаляем
                                                                                 const newUsers=[...refSelectUser.current.state.options];
@@ -600,7 +600,7 @@ function Users() {
                                                                                    WHERE RIGHTS_ID=@right_id;
                                                                                  END;`;
                                                                    data.params['right_id']=+right_id;
-                                                                   getQuery(data,
+                                                                   getSQLRun(data,
                                                                                 function(response0) {
                                                                                   //находим право в списке, удаляем
                                                                                   const newRights=[...refSelectRight.current.state.options];
@@ -650,7 +650,7 @@ function Users() {
                        }
                        data.params['user_id']=+user_id;
                        data.params['right_id']=+right_id;
-                       getQuery(data,
+                       getSQLRun(data,
                                     function(response0) {
                                        console.log(response0.data);
                                     }

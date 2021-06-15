@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Aside from './Aside';
 import Main from './Main';
-import {getAuth} from './common.js';
+import {getAuth} from './system.js';
 
 function Layout({ setLocale,setIsAuth }) {
   const [rtl, setRtl] = useState(false);

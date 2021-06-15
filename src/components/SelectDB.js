@@ -1,6 +1,6 @@
 import React from 'react';
 import Multiselect from 'react-bootstrap-multiselect';
-import {getParamForSQL,getParamDiff,getQuery} from '../common.js';
+import {getParamForSQL,getParamDiff,getSQLRun} from '../system.js';
 import 'react-bootstrap-multiselect/css/bootstrap-multiselect.css';
 
 //import $ from 'jquery'
@@ -84,7 +84,7 @@ class SelectDB extends React.Component {
         this.props.obj.beforeLoadData(this,data);
     }
     if (!((!!this.props.obj.beforeLoadData) && (typeof data.error === 'boolean'))) {
-      getQuery(data,(response)=> {
+      getSQLRun(data,(response)=> {
                     if (response.data.length>0) {
                       this.setState({options:response.data});
                     }

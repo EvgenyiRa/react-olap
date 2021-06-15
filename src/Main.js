@@ -9,7 +9,7 @@ import logo from './img/logo.png';
 
 import Admin_users from './forms/admin/Users';
 import CalcOLAP from './forms/CalcOLAP';
-import {getAuth,getCheckRight} from './common.js';
+import {getAuth,getCheckRight} from './system.js';
 
 
 const Main = ({

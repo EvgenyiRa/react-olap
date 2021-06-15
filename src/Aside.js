@@ -17,7 +17,7 @@ import { GiExitDoor } from 'react-icons/gi';
 
 import sidebarBg from './img/logo.png';
 
-import {delAuth,getCheckRight} from './common.js';
+import {delAuth,getCheckRight} from './system.js';
 
 const Aside = ({ image, collapsed, rtl, toggled, handleToggleSidebar,handleCollapsedChange,setIsAuth,userInfo }) => {
   const intl = useIntl();

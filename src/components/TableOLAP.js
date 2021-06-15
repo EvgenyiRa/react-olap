@@ -1,6 +1,6 @@
 import React from 'react';
 import CustomAlert from './CustomAlert';
-import {getParamForSQL,getParamDiff,secondstotime,getTableOLAP,getCursorPosition,getExecQuery,houreLifeCookies,getQuery,getTagExit,getDBType} from '../common.js';
+import {getParamForSQL,getParamDiff,secondstotime,getTableOLAP,getCursorPosition,getExecQuery,houreLifeCookies,getSQLRun,getTagExit,getDBType} from '../system.js';
 
 import $ from 'jquery'
 
@@ -1592,7 +1592,7 @@ class TableOLAP extends React.Component {
         else if (dbtype==='mssql') {
           data.sql=`DROP TABLE `+tabname;
           this.state.tabname=undefined;
-          getQuery(data,function(response) {
+          getSQLRun(data,function(response) {
                           console.log('Удаление таблицы '+tabname);
                           console.log(response);
                       });
@@ -1632,7 +1632,7 @@ class TableOLAP extends React.Component {
           data.sql+=` AND T.TABLE_NAME!='`+this.state.tabname+`'`;
         }
       }
-      getQuery(data,(response)=> {
+      getSQLRun(data,(response)=> {
           if (response.data.length>0) {
             const data1={};
             if (dbtype==='ora') {
@@ -1653,7 +1653,7 @@ class TableOLAP extends React.Component {
                 console.log('Удаление таблицы '+item.OBJECT_NAME);
               });
               data1.sql+=`END;`;
-              getQuery(data1,function(response1) {
+              getSQLRun(data1,function(response1) {
                 console.log(response1);
               });
             }
@@ -1688,7 +1688,7 @@ class TableOLAP extends React.Component {
               else if (dbtype==='mssql') {
                 data.sql=`DROP TABLE `+thisV.state.tabname;
                 thisV.state.tabname=undefined;
-                getQuery(data,function(response) {
+                getSQLRun(data,function(response) {
                             thisV.getDataSQL();
                           },
                           thisV.props.obj.stateLoadObj
