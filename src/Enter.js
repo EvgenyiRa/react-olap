@@ -6,18 +6,8 @@ import {setAuth} from './system.js';
 import {Switch,Route} from 'react-router-dom';
 
 function Enter({setIsAuth}) {
-  useEffect(() => {
-    let cityV=localStorage.getItem('city');
-    if (cityV===null) {
-        cityV='def';
-        localStorage.setItem('city', cityV);
-    }
-  }, []);
-
   let [resultAuth,setResultAuth]=useState(null);
-  const butEnterClick=()=>{
-    /*alert('click');
-    console.log('setIsAuth',setIsAuth);*/
+  const handleEnterClick=()=>{
     let userL=document.getElementById('user').value.trim(),
         passwordL=document.getElementById('password').value.trim();
     if ((userL.length>0) & (passwordL.length>0)) {
@@ -50,7 +40,7 @@ function Enter({setIsAuth}) {
               <img htmlFor="password" className="icon-user" src={EnterPassword} title="Пароль" alt="Пароль"/>
               <input type="password" className="password" id="password" />
               <label htmlFor="remember"><input type="checkbox" id="remember" /><span className="remember"/>Запомнить меня</label>
-              <input type="submit" value="Войти" className="but_enter" onClick={()=>butEnterClick()}/>
+              <input type="submit" value="Войти" className="but_enter" onClick={()=>handleEnterClick()}/>
               <label style={{position:'absolute',top: '7.5rem',color:'white',left:'7%',fontSize:'14px',textShadow: '0 1px red'}}>{resultAuth}</label>
             </div>
         </div>
