@@ -308,14 +308,14 @@ export function getHashPwd(data,callback,stateLoadObj) {
   });
 }
 
-export function getExecQuery(data,callback,stateLoadObj) {
+export function getSQLRun2(data,callback,stateLoadObj) {
   getAuthorization(data,function(result){
     if (result) {
       if (!!stateLoadObj) {
         stateLoadObj.current.setState((state) => ({vis:++state.vis}));
       }
       function axiosInstanceFunc() {
-        axiosInstance.post('/'+dbtype+'/execquery',data)
+        axiosInstance.post('/'+dbtype+'/sqlrun2',data)
         .then(function(response) {
           if (response.status !== 200) {
             console.log('Authentication failed.' + response.status);
