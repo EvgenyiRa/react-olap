@@ -48,17 +48,6 @@ class MultiselectSQL extends React.Component {
                   else {
                     this.setState({options:this.stateDefaultOptions});
                   }
-                  if (!this.multiple) {
-                    this.state.checkedOptions=this.state.options[0].value;
-                    if ((!!this.props.obj.paramGroup) & (!!this.props.obj.setParamGroup)) {
-                      let newObj = { ...this.props.obj.paramGroup };
-                      newObj[this.props.obj.parChealdID]=this.state.options[0].value;
-                      this.props.obj.setParamGroup(newObj);
-                    }
-                  }
-                  if (!!this.props.obj.afterLoadData) {
-                      this.props.obj.afterLoadData(this,response);
-                  }
                 },
               val.props.obj.stateLoadObj
             );
