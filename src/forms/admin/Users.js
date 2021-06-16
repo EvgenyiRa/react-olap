@@ -1,24 +1,26 @@
-import React,{ useState,useRef } from 'react';
+import React,{ useState,useRef,useEffect,useReducer } from 'react';
 
 import LoadState from '../../components/LoadState';
 import CustomAlert from '../../components/CustomAlert';
 import CustomConfirm from '../../components/CustomConfirm';
 import ModalStage from '../../components/ModalStage';
 import TableOLAP from '../../components/TableOLAP';
-import SelectDB from '../../components/SelectDB';
+import MultiselectSQL from '../../components/MultiselectSQL';
 import InputBC from '../../components/InputBC';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Multiselect from 'react-bootstrap-multiselect';
+import 'react-bootstrap-multiselect/css/bootstrap-multiselect.css';
 //import InputGroup from 'react-bootstrap/InputGroup';
 
 import $ from 'jquery'
 
-import {getSQLRun,getHashPwd} from '../../system.js';
+import {getSQLRun,getHashPwd,getDiffArray} from '../../system.js';
 
 function Users() {
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
-  let [paramGroupV, setParamGroupV] = useState({users:[],rights:[]});
+  let [paramGroupV, setParamGroupV] = useState({users:[-1],rights:[-1]});
   //хук-ссылки на элементы для удобной работы с ними
   const refCustomAlert=useRef(),
         refCustomConfirm=useRef(),
@@ -48,7 +50,7 @@ function Users() {
                                     R.FIO [label]
                                 FROM REP_USERS R
                                 ORDER BY R.FIO`,
-                        multiple:true
+                        id:"selectUsers"
                        };
 
    //объект для выпадающего списка с данными из БД
@@ -451,7 +453,6 @@ function Users() {
     id:'tabUsers',
     stateLoadObj:refLoadState,
     paramGroup:paramGroupV,
-    setParamGroup:setParamGroupV,
     parParentID:['users','rights'],
     data:{params_val: {},
           sql_true: `SELECT U.FIO+
@@ -672,6 +673,8 @@ function Users() {
                }},
   };
 
+
+
   return (
     <div className="App">
       <LoadState ref={refLoadState} />
@@ -680,10 +683,10 @@ function Users() {
       <Container fluid>
         <Row>
           <Col>
-            <SelectDB ref={refSelectUser} obj={selectUserObj}/>
+            <MultiselectSQL ref={refSelectUser} obj={selectUserObj}/>
           </Col>
           <Col>
-            <SelectDB ref={refSelectRight} obj={ selectRightObj }/>
+            <MultiselectSQL ref={refSelectRight} obj={ selectRightObj }/>
           </Col>
         </Row>
         <Row style={{marginTop:'1rem'}}>
