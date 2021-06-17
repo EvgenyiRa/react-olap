@@ -1,7 +1,7 @@
 import React,{ useState,useRef,useEffect,useReducer } from 'react';
 
 import LoadState from '../../components/LoadState';
-import CustomAlert from '../../components/CustomAlert';
+import AlertPlus from '../../components/AlertPlus';
 import CustomConfirm from '../../components/CustomConfirm';
 import ModalStage from '../../components/ModalStage';
 import TableOLAP from '../../components/TableOLAP';
@@ -22,7 +22,7 @@ function Users() {
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
   let [paramGroupV, setParamGroupV] = useState({users:[-1],rights:[-1]});
   //хук-ссылки на элементы для удобной работы с ними
-  const refCustomAlert=useRef(),
+  const refAlertPlus=useRef(),
         refCustomConfirm=useRef(),
         refLoadState=useRef(),
         refModalStage=useRef(),
@@ -519,7 +519,7 @@ function Users() {
            },
     editRow:(thisV) => {
             if (thisV.state.selectRow.length===0) {
-                refCustomAlert.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
+                refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
             }
             else {
                 refModalStage.current.setState(getModalStageUser('edit',thisV.state.selectRow[0]));
@@ -527,7 +527,7 @@ function Users() {
           },
     deleteRow:(thisV) => {
                 if (thisV.state.selectRow.length===0) {
-                    refCustomAlert.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
+                    refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
                 }
                 else {
                     refCustomConfirm.current.setState({show:true,
@@ -573,7 +573,7 @@ function Users() {
                {id:'edit_right',label:'Редактировать право',
                 callback:(thisV) => {
                   if (thisV.state.selectTd.length===0) {
-                      refCustomAlert.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по ячейке выбрать право'});
+                      refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по ячейке выбрать право'});
                   }
                   else {
                       refModalStage.current.setState(getModalStageRight('edit',thisV.state.selectTd[0]));
@@ -582,7 +582,7 @@ function Users() {
                 {id:'delete_right',label:'Удалить право',
                  callback:(thisV) => {
                    if (thisV.state.selectTd.length===0) {
-                       refCustomAlert.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по ячейке выбрать право'});
+                       refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по ячейке выбрать право'});
                    }
                    else {
                        refCustomConfirm.current.setState({show:true,
@@ -678,7 +678,7 @@ function Users() {
   return (
     <div className="App">
       <LoadState ref={refLoadState} />
-      <CustomAlert ref={refCustomAlert}/>
+      <AlertPlus ref={refAlertPlus}/>
       <CustomConfirm ref={refCustomConfirm}/>
       <Container fluid>
         <Row>

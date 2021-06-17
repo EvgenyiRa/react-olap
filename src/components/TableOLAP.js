@@ -1,5 +1,5 @@
 import React from 'react';
-import CustomAlert from './CustomAlert';
+import AlertPlus from './AlertPlus';
 import {getParamForSQL,getParamDiff,secondstotime,getTableOLAP,getCursorPosition,getSQLRun2,houreLifeCookies,getSQLRun,getTagExit,getDBType} from '../system.js';
 
 import $ from 'jquery'
@@ -121,7 +121,7 @@ class TableOLAP extends React.Component {
 
       thisV.prPanelMove=false;
 
-      this.refCustomAlert=React.createRef();
+      this.refAlertPlus=React.createRef();
     }
 
     getGraf() {
@@ -661,7 +661,7 @@ class TableOLAP extends React.Component {
           }
         }
         else {
-            thisV.refCustomAlert.current.setState({show:true,text:'Запрещается перемещение из категории, где находится менее двух элементов отображения'});
+            thisV.refAlertPlus.current.setState({show:true,text:'Запрещается перемещение из категории, где находится менее двух элементов отображения'});
             prOk=false;
         }
       }
@@ -1820,7 +1820,7 @@ class TableOLAP extends React.Component {
 
         return (
               <div>
-                <CustomAlert ref={this.refCustomAlert}/>
+                <AlertPlus ref={this.refAlertPlus}/>
                 <TableRender
                   id={this.props.obj.id}
                   className={this.props.obj.className}
