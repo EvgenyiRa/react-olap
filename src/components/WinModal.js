@@ -3,27 +3,21 @@ import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-class ModalStage extends React.Component {
+class WinModal extends React.Component {
     constructor(props) {
         super(props);
+        this.setModalShow = this.setModalShow.bind(this);
         this.state = {
           modalShow:false,
           header:'',
           body:undefined,
           nextButtonLabel:'Далее',
-          prevButtonLabel:'Назад',
           cancelButtonLabel:'Закрыть',
-          stage:1,
-          attr:{},
           nextButtonDisplay:'block',
-          prevButtonDisplay:'none',
           cancelButtonDisplay:'block',
-          handleButtonPrev:undefined,
           handleButtonNext:undefined,
           handleButtonCancel:undefined,
-          footerInfo:undefined,
         };
-        this.setModalShow = this.setModalShow.bind(this);
         if (!!!this.props.obj) {
             this.props_obj={};
         }
@@ -38,31 +32,11 @@ class ModalStage extends React.Component {
         }
     }
 
-    setModalShow(val) {
-      this.setState({modalShow: val});
-    }
-
-    componentDidMount() {
-        if (!!this.props_obj.componentDidMount) {
-            this.props_obj.componentDidMount(this);
-        }
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-      if (!!this.props_obj.componentDidUpdate) {
-          this.props_obj.componentDidUpdate(this,prevProps, prevState, snapshot);
-      }
+    setModalShow(value) {
+      this.setState({modalShow: value});
     }
 
     render() {
-      const FooterInfo=()=>{
-          if (!!this.state.footerInfo) {
-            return <div className="footerInfo">{this.state.footerInfo}</div>;
-          }
-          else {
-            return null;
-          }
-      }
         return (
           <Modal size={this.size} show={this.state.modalShow}
                  onHide={() =>{
@@ -83,17 +57,6 @@ class ModalStage extends React.Component {
               {this.state.body}
             </Modal.Body>
             <Modal.Footer>
-              <FooterInfo/>
-              <Button
-                  onClick={() => {
-                            if (!!this.state.handleButtonPrev) {
-                              this.state.handleButtonPrev(this)
-                            }
-                          }}
-                  style={{display:this.state.prevButtonDisplay}}
-              >
-                  {this.state.prevButtonLabel}
-              </Button>
               <Button onClick={() => {
                                 if (!!this.state.handleButtonNext) {
                                   this.state.handleButtonNext(this)
@@ -121,4 +84,4 @@ class ModalStage extends React.Component {
     }
 }
 
-export default ModalStage;
+export default WinModal;

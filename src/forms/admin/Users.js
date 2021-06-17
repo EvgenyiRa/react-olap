@@ -3,7 +3,7 @@ import React,{ useState,useRef,useEffect,useReducer } from 'react';
 import Loading from '../../components/Loading';
 import AlertPlus from '../../components/AlertPlus';
 import ConfirmPlus from '../../components/ConfirmPlus';
-import ModalStage from '../../components/ModalStage';
+import WinModal from '../../components/WinModal';
 import TableOLAP from '../../components/TableOLAP';
 import MultiselectSQL from '../../components/MultiselectSQL';
 import BootstrapInput from '../../components/BootstrapInput';
@@ -25,7 +25,7 @@ function Users() {
   const refAlertPlus=useRef(),
         refConfirmPlus=useRef(),
         refLoading=useRef(),
-        refModalStage=useRef(),
+        refWinModal=useRef(),
         refInputFIO=useRef(),
         refInputLogin=useRef(),
         refInputPwdVis=useRef(),
@@ -67,7 +67,7 @@ function Users() {
                         };
 
   //получение объекта модального окна для работы с пользователями (добавление,редактирование)
-  const getModalStageUser=(type,tr) => {
+  const getWinModalUser=(type,tr) => {
     const handleButtonNextL=() => {
       let data={};
       data.params={};
@@ -131,7 +131,7 @@ function Users() {
                                                        refSelectUser.current.setState({options:newUsers});
                                                        refTableOLAP.current.getDropTableOne();
                                                        refTableOLAP.current.getDataSQL();
-                                                       refModalStage.current.setState({modalShow:false});
+                                                       refWinModal.current.setState({modalShow:false});
                                                     },
                                                     refLoading
                                                   );
@@ -178,7 +178,7 @@ function Users() {
                                            }
                                            refTableOLAP.current.getDropTableOne();
                                            refTableOLAP.current.getDataSQL();
-                                           refModalStage.current.setState({modalShow:false});
+                                           refWinModal.current.setState({modalShow:false});
                                         },
                                         refLoading
                                       );
@@ -301,7 +301,7 @@ function Users() {
   }
 
   //получение объекта модального окна для работы с правами (добавление,редактирование)
-  const getModalStageRight=(type,td) => {
+  const getWinModalRight=(type,td) => {
     const handleButtonNextL=() => {
       let data={};
       data.params={};
@@ -349,7 +349,7 @@ function Users() {
                                            refSelectRight.current.setState({options:newRights});
                                            refTableOLAP.current.getDropTableOne();
                                            refTableOLAP.current.getDataSQL();
-                                           refModalStage.current.setState({modalShow:false});
+                                           refWinModal.current.setState({modalShow:false});
                                         },
                                         refLoading
                                       );
@@ -372,7 +372,7 @@ function Users() {
                                          }
                                          refTableOLAP.current.getDropTableOne();
                                          refTableOLAP.current.getDataSQL();
-                                         refModalStage.current.setState({modalShow:false});
+                                         refWinModal.current.setState({modalShow:false});
                                       },
                                       refLoading
                                     );
@@ -515,14 +515,14 @@ function Users() {
     graf:true,
     //действия панели таблицы
     addRow:(thisV) => {
-              refModalStage.current.setState(getModalStageUser('add'));
+              refWinModal.current.setState(getWinModalUser('add'));
            },
     editRow:(thisV) => {
             if (thisV.state.selectRow.length===0) {
                 refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
             }
             else {
-                refModalStage.current.setState(getModalStageUser('edit',thisV.state.selectRow[0]));
+                refWinModal.current.setState(getWinModalUser('edit',thisV.state.selectRow[0]));
             }
           },
     deleteRow:(thisV) => {
@@ -568,7 +568,7 @@ function Users() {
              },
     dopAction:[{id:'add_right',label:'Добавить право',
                 callback:(thisV) => {
-                  refModalStage.current.setState(getModalStageRight('add'));
+                  refWinModal.current.setState(getWinModalRight('add'));
                 }},
                {id:'edit_right',label:'Редактировать право',
                 callback:(thisV) => {
@@ -576,7 +576,7 @@ function Users() {
                       refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по ячейке выбрать право'});
                   }
                   else {
-                      refModalStage.current.setState(getModalStageRight('edit',thisV.state.selectTd[0]));
+                      refWinModal.current.setState(getWinModalRight('edit',thisV.state.selectTd[0]));
                   }
                 }},
                 {id:'delete_right',label:'Удалить право',
@@ -692,7 +692,7 @@ function Users() {
         <Row style={{marginTop:'1rem'}}>
           <Col>
             <TableOLAP ref={refTableOLAP} obj={tableOLAPObj}/>
-            <ModalStage ref={refModalStage}/>
+            <WinModal ref={refWinModal}/>
           </Col>
         </Row>
 

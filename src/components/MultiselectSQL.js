@@ -3,12 +3,9 @@ import Multiselect from 'react-bootstrap-multiselect';
 import {getParamForSQL,getParamDiff,getSQLRun} from '../system.js';
 import 'react-bootstrap-multiselect/css/bootstrap-multiselect.css';
 
-//import $ from 'jquery'
-
 class MultiselectSQL extends React.Component {
   constructor(props) {
       super(props);
-      //console.log('props',props);
       this.handleDropdownHidden = this.handleDropdownHidden.bind(this);
       this.handleChange = this.handleChange.bind(this);
       this.handleSelectAll = this.handleSelectAll.bind(this);
@@ -55,30 +52,19 @@ class MultiselectSQL extends React.Component {
   }
 
   componentDidMount() {
-      this.setState({options:this.stateDefaultOptions});
       if (!!!this.props.obj.parParentID) {
           this.getOptionsBySQL();
-      }
-      if (!!this.props.obj.componentDidMount) {
-          this.props.obj.componentDidMount(this);
       }
   }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-      // Популярный пример (не забудьте сравнить пропсы):
-      //console.log(val.props);
       if (getParamDiff(this.props.obj.paramGroup,prevProps.obj.paramGroup,this.props.obj.parParentID)) {
           this.getOptionsBySQL();
-      }
-      if (!!this.props.obj.componentDidUpdate) {
-          this.props.obj.componentDidUpdate(this,prevProps, prevState, snapshot);
       }
     }
 
     handleDropdownHidden() {
       if (!!this.state.checkedOptions){
-        //запоминаем выбранное при скрытии списка выбора только для множественного выбора,
-        //для единичного выбора событие срабатывает до события handleChange, поэтому для него здесь изменять параметры формы не своевременно
         if ((!!this.props.obj.parChealdID) & (!!this.props.obj.setParamGroup) & (!!this.props.obj.paramGroup)) {
             let newObj = { ...this.props.obj.paramGroup };
             newObj[this.props.obj.parChealdID]=this.state.checkedOptions;
