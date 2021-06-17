@@ -6,14 +6,13 @@ import $ from 'jquery';
 
 class AlertPlus extends React.Component {
   constructor(props) {
-      super(props);
-      //console.log('props',props);
+      super(props);      
+      this.handleClick = this.handleClick.bind(this);
+      this.handleShow = this.handleShow.bind(this);
       this.state = {
         show:false,
         text:''
       };
-      this.handleClick = this.handleClick.bind(this);
-      this.handleShow = this.handleShow.bind(this);
   }
 
   handleClick() {

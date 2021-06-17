@@ -2,7 +2,7 @@ import React,{ useState,useRef,useEffect,useReducer } from 'react';
 
 import LoadState from '../../components/LoadState';
 import AlertPlus from '../../components/AlertPlus';
-import CustomConfirm from '../../components/CustomConfirm';
+import ConfirmPlus from '../../components/ConfirmPlus';
 import ModalStage from '../../components/ModalStage';
 import TableOLAP from '../../components/TableOLAP';
 import MultiselectSQL from '../../components/MultiselectSQL';
@@ -23,7 +23,7 @@ function Users() {
   let [paramGroupV, setParamGroupV] = useState({users:[-1],rights:[-1]});
   //хук-ссылки на элементы для удобной работы с ними
   const refAlertPlus=useRef(),
-        refCustomConfirm=useRef(),
+        refConfirmPlus=useRef(),
         refLoadState=useRef(),
         refModalStage=useRef(),
         refInputFIO=useRef(),
@@ -530,7 +530,7 @@ function Users() {
                     refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
                 }
                 else {
-                    refCustomConfirm.current.setState({show:true,
+                    refConfirmPlus.current.setState({show:true,
                                                       text:'Вы действительно хотите удалить пользователя с ФИО "'+$(thisV.state.selectRow[0]).find('td#FIO').text()+'"',
                                                       callback:(res) => {
                                                           if (res) {
@@ -585,7 +585,7 @@ function Users() {
                        refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по ячейке выбрать право'});
                    }
                    else {
-                       refCustomConfirm.current.setState({show:true,
+                       refConfirmPlus.current.setState({show:true,
                                                          text:'Вы действительно хотите удалить право с наименованием "'+$(thisV.state.selectTd[0]).text()+'"',
                                                          callback:(res) => {
                                                              if (res) {
@@ -679,7 +679,7 @@ function Users() {
     <div className="App">
       <LoadState ref={refLoadState} />
       <AlertPlus ref={refAlertPlus}/>
-      <CustomConfirm ref={refCustomConfirm}/>
+      <ConfirmPlus ref={refConfirmPlus}/>
       <Container fluid>
         <Row>
           <Col>
