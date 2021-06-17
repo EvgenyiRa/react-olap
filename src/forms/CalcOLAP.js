@@ -1,6 +1,6 @@
 import React,{ useState,useRef } from 'react';
 
-import LoadState from '../components/LoadState';
+import Loading from '../components/Loading';
 import AlertPlus from '../components/AlertPlus';
 import TableOLAP from '../components/TableOLAP';
 import BootstrapInput from '../components/BootstrapInput';
@@ -19,7 +19,7 @@ function CalcOLAP() {
   let [paramGroupV, setParamGroupV] = useState({begDate:/*format(startOfMonth(newDate),'yyyy-MM-dd')*/'2020-09-01',endDate:'2020-09-02'/*format(newDate,'yyyy-MM-dd')*/});
   //хук-ссылки на элементы для удобной работы с ними
   const refAlertPlus=useRef(),
-        refLoadState=useRef(),
+        refLoading=useRef(),
         refTableOLAP=useRef(),
         refInputBegDate=useRef(),
         refInputEndDate=useRef();
@@ -52,7 +52,7 @@ function CalcOLAP() {
 
   const tableOLAPObj={
     id:'calc',
-    stateLoadObj:refLoadState,
+    stateLoadObj:refLoading,
     paramGroup:paramGroupV,
     setParamGroup:setParamGroupV,
     parParentID:['begDate','endDate'],
@@ -267,7 +267,7 @@ function CalcOLAP() {
 
   return (
     <div className="App">
-      <LoadState ref={refLoadState} />
+      <Loading ref={refLoading} />
       <AlertPlus ref={refAlertPlus}/>
       <Container fluid>
         <Row>

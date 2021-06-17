@@ -6,10 +6,8 @@ class BootstrapInput extends React.Component {
       super(props);
       this.state = {
         value:(!!this.props.obj.defaultValue)?this.props.obj.defaultValue:undefined,
-        isValid:(typeof this.props.obj.isValid==='boolean')?this.props.obj.isValid:false,
         isInvalid:(typeof this.props.obj.isInvalid==='boolean')?this.props.obj.isInvalid:false,
         invalidText:(!!this.props.obj.invalidText)?this.props.obj.invalidText:'',
-        validText:(!!this.props.obj.validText)?this.props.obj.validText:'',
         type:(!!this.props.obj.type)?this.props.obj.type:'text',
         placeholder:'Введите значение',
       };
@@ -27,7 +25,7 @@ class BootstrapInput extends React.Component {
             id={this.props.obj.id}
             type={this.state.type}
             defaultValue={this.props.obj.defaultValue}
-            isValid={this.state.isValid}
+            isValid={false}
             isInvalid={this.state.isInvalid}
             readOnly={false}
             disabled={false}
@@ -47,9 +45,6 @@ class BootstrapInput extends React.Component {
           />
           <FormControl.Feedback type="invalid">
               {this.state.invalidText}
-          </FormControl.Feedback>
-          <FormControl.Feedback type="valid">
-              {this.state.validText}
           </FormControl.Feedback>
       </div>
     );

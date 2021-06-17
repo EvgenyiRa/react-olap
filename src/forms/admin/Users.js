@@ -1,6 +1,6 @@
 import React,{ useState,useRef,useEffect,useReducer } from 'react';
 
-import LoadState from '../../components/LoadState';
+import Loading from '../../components/Loading';
 import AlertPlus from '../../components/AlertPlus';
 import ConfirmPlus from '../../components/ConfirmPlus';
 import ModalStage from '../../components/ModalStage';
@@ -24,7 +24,7 @@ function Users() {
   //хук-ссылки на элементы для удобной работы с ними
   const refAlertPlus=useRef(),
         refConfirmPlus=useRef(),
-        refLoadState=useRef(),
+        refLoading=useRef(),
         refModalStage=useRef(),
         refInputFIO=useRef(),
         refInputLogin=useRef(),
@@ -38,7 +38,7 @@ function Users() {
         refInputRightSysName=useRef();
 
   //объект для выпадающего списка с данными из БД
-  const selectUserObj={stateLoadObj:refLoadState,
+  const selectUserObj={stateLoadObj:refLoading,
                         label:'Пользователи',
                         paramGroup:paramGroupV,
                         setParamGroup:setParamGroupV,
@@ -54,7 +54,7 @@ function Users() {
                        };
 
    //объект для выпадающего списка с данными из БД
-   const selectRightObj={stateLoadObj:refLoadState,
+   const selectRightObj={stateLoadObj:refLoading,
                          label:'Права',
                          paramGroup:paramGroupV,
                          setParamGroup:setParamGroupV,
@@ -133,10 +133,10 @@ function Users() {
                                                        refTableOLAP.current.getDataSQL();
                                                        refModalStage.current.setState({modalShow:false});
                                                     },
-                                                    refLoadState
+                                                    refLoading
                                                   );
                                      },
-                                     refLoadState
+                                     refLoading
                                     );
                         }
                     }
@@ -180,7 +180,7 @@ function Users() {
                                            refTableOLAP.current.getDataSQL();
                                            refModalStage.current.setState({modalShow:false});
                                         },
-                                        refLoadState
+                                        refLoading
                                       );
                          }
                          if (password.length>0) {
@@ -190,7 +190,7 @@ function Users() {
                                        data.params['password']=response.hash;
                                        updUser();
                                      },
-                                     refLoadState
+                                     refLoading
                                     );
                           }
                           else {
@@ -200,7 +200,7 @@ function Users() {
                     }
                   }
                  },
-                 refLoadState
+                 refLoading
                 );
       }
     }
@@ -351,7 +351,7 @@ function Users() {
                                            refTableOLAP.current.getDataSQL();
                                            refModalStage.current.setState({modalShow:false});
                                         },
-                                        refLoadState
+                                        refLoading
                                       );
                         }
                     }
@@ -374,13 +374,13 @@ function Users() {
                                          refTableOLAP.current.getDataSQL();
                                          refModalStage.current.setState({modalShow:false});
                                       },
-                                      refLoadState
+                                      refLoading
                                     );
                       }
                     }
                   }
                 },
-                refLoadState
+                refLoading
               );
       }
     }
@@ -451,7 +451,7 @@ function Users() {
 
   const tableOLAPObj={
     id:'tabUsers',
-    stateLoadObj:refLoadState,
+    stateLoadObj:refLoading,
     paramGroup:paramGroupV,
     parParentID:['users','rights'],
     data:{params_val: {},
@@ -559,7 +559,7 @@ function Users() {
                                                                                 thisV.getDropTableOne();
                                                                                 thisV.getDataSQL();
                                                                              },
-                                                                             refLoadState
+                                                                             refLoading
                                                                            );
                                                             }
                                                           }
@@ -615,7 +615,7 @@ function Users() {
                                                                                   thisV.getDropTableOne();
                                                                                    thisV.getDataSQL();
                                                                                 },
-                                                                                refLoadState
+                                                                                refLoading
                                                                               );
                                                                }
                                                              }
@@ -677,7 +677,7 @@ function Users() {
 
   return (
     <div className="App">
-      <LoadState ref={refLoadState} />
+      <Loading ref={refLoading} />
       <AlertPlus ref={refAlertPlus}/>
       <ConfirmPlus ref={refConfirmPlus}/>
       <Container fluid>

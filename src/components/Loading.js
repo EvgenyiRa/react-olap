@@ -1,7 +1,7 @@
 import React from 'react';
 import LinearProgress from '@material-ui/core/LinearProgress';
 
-class LoadState extends React.Component {
+class Loading extends React.Component {
   constructor(props) {
       super(props);
       //console.log('props',props);
@@ -16,8 +16,8 @@ class LoadState extends React.Component {
           position: 'fixed',
           top: 0,
           left: 0,
-          height:'1em',
-          zIndex: 7
+          height:'1.001em',
+          zIndex: 8
         },
         hidden: {display:'none'}
       };
@@ -40,4 +40,4 @@ class LoadState extends React.Component {
   }
 }
 
-export default LoadState;
+export default Loading;
