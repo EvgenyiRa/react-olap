@@ -3,7 +3,7 @@ import React,{ useState,useRef } from 'react';
 import LoadState from '../components/LoadState';
 import AlertPlus from '../components/AlertPlus';
 import TableOLAP from '../components/TableOLAP';
-import InputBC from '../components/InputBC';
+import BootstrapInput from '../components/BootstrapInput';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -272,10 +272,10 @@ function CalcOLAP() {
       <Container fluid>
         <Row>
           <Col>
-            <InputBC ref={refInputBegDate} obj={inputBegDateObj}/>
+            <BootstrapInput ref={refInputBegDate} obj={inputBegDateObj}/>
           </Col>
           <Col>
-            <InputBC ref={refInputEndDate} obj={ inputEndDateObj }/>
+            <BootstrapInput ref={refInputEndDate} obj={ inputEndDateObj }/>
           </Col>
         </Row>
         <Row style={{marginTop:'1rem'}}>

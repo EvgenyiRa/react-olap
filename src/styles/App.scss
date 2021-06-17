@@ -668,12 +668,12 @@ div.MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-formControl fieldset {
   display: none;
 }
 
-div.divForInputBC {
+div.bootstrapInputContainer {
   margin: 0.7rem 0.7rem 0 0;
   position: relative;
 }
 
-div.divForInputBC label.labelForInputBC {
+div.bootstrapInputContainer label.labelBeforeBootstrapInput {
   position: absolute;
   top: -0.4rem;
   left: 1.5rem;
@@ -688,7 +688,7 @@ div.divForInputBC label.labelForInputBC {
   z-index: 77;
 }
 
-div.divForInputBC input {
+div.bootstrapInputContainer input {
   height: 3.5rem;
 }
 

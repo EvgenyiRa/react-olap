@@ -6,7 +6,7 @@ import ConfirmPlus from '../../components/ConfirmPlus';
 import ModalStage from '../../components/ModalStage';
 import TableOLAP from '../../components/TableOLAP';
 import MultiselectSQL from '../../components/MultiselectSQL';
-import InputBC from '../../components/InputBC';
+import BootstrapInput from '../../components/BootstrapInput';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -212,7 +212,7 @@ function Users() {
         body:<Container fluid>
                 <Row>
                   <Col>
-                    <InputBC
+                    <BootstrapInput
                       ref={refInputFIO}
                       obj={{
                         label:'ФИО',
@@ -231,7 +231,7 @@ function Users() {
                     />
                   </Col>
                   <Col>
-                    <InputBC
+                    <BootstrapInput
                       ref={refInputLogin}
                       obj={{
                         label:'Логин',
@@ -252,7 +252,7 @@ function Users() {
                 </Row>
                 <Row style={{marginTop:'1rem'}}>
                   <Col>
-                    <InputBC
+                    <BootstrapInput
                       ref={refInputPwdVis}
                       obj={{
                         label:'Пароль',
@@ -272,7 +272,7 @@ function Users() {
                     />
                   </Col>
                   <Col>
-                    <InputBC
+                    <BootstrapInput
                       ref={refInputEmail}
                       obj={{
                         label:'Email',
@@ -285,7 +285,7 @@ function Users() {
                 </Row>
                 <Row style={{marginTop:'1rem'}}>
                   <Col>
-                    <InputBC
+                    <BootstrapInput
                       ref={refInputPhone}
                       obj={{
                         label:'Телефон',
@@ -405,7 +405,7 @@ function Users() {
         body:<Container fluid>
                 <Row>
                   <Col>
-                    <InputBC
+                    <BootstrapInput
                       ref={refInputRightName}
                       obj={{
                         label:'Наименование права',
@@ -426,7 +426,7 @@ function Users() {
                 </Row>
                 <Row style={{marginTop:'1rem'}}>
                   <Col>
-                    <InputBC
+                    <BootstrapInput
                       ref={refInputRightSysName}
                       obj={{
                         label:'Сис.наименование права',
