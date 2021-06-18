@@ -11,7 +11,7 @@ function Enter({setIsAuth}) {
     let userL=document.getElementById('user').value.trim(),
         passwordL=document.getElementById('password').value.trim();
     if ((userL.length>0) & (passwordL.length>0)) {
-      setAuth({"login":userL,"password":passwordL,"city":'def'},
+      setAuth({"login":userL,"password":passwordL},
         function(response) {
           if ((response.status===200) & (!!response.data.token)) {
               setIsAuth(true);
