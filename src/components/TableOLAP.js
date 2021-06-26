@@ -616,7 +616,7 @@ class TableOLAP extends React.Component {
       }
       const thisV=this;
       //пришедший ID
-      const idIn=ev.originalEvent.dataTransfer.getData("Text");
+      const idIn=String(ev.originalEvent.dataTransfer.getData("Text"));
       if ((idIn==='nodrag') || (ev.originalEvent.dataTransfer.effectAllowed!=='move')) {
         return false;
       }
@@ -635,7 +635,7 @@ class TableOLAP extends React.Component {
       if ((!$(elOut).is('a.TabOLAPPol')) & (!$(elOut).is('div.td_pok_name')) & ((!$(elOut).is('td')))) {
           elOut=$(elOut).closest('td');
       }
-      const idOut=$(elOut).attr('id');
+      const idOut=String($(elOut).attr('id'));
       //меняем OLAP-структуру в соответсвии с изменениями
       const dataNew={...this.state.data};
 
