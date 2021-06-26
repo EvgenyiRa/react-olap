@@ -5,19 +5,19 @@ import {
   ProSidebar,
   Menu,
   MenuItem,
-  SubMenu,
+  /*SubMenu,*/
   SidebarHeader,
   SidebarFooter,
   SidebarContent,
 } from 'react-pro-sidebar';
 import { FcHome } from 'react-icons/fc';
-import { AiOutlineBank,AiOutlineColumnWidth } from 'react-icons/ai';
+import { AiOutlineColumnWidth } from 'react-icons/ai';
 import { CgCloseR } from 'react-icons/cg';
 import { GiExitDoor } from 'react-icons/gi';
 
 import sidebarBg from './img/logo.png';
 
-import {delAuth,getCheckRight} from './system.js';
+import {delAuth/*,getCheckRight*/} from './system.js';
 
 const Aside = ({ image, collapsed, rtl, toggled, handleToggleSidebar,handleCollapsedChange,setIsAuth,userInfo }) => {
   const intl = useIntl();

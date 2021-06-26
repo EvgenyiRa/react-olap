@@ -195,15 +195,15 @@ class TableOLAP extends React.Component {
             if (!!thisV.state.strgrouping.onSubItog) {
               //инициализируем подсчет подытогов
               //формируем заготовки для подытоговых строк
-              for (var prop in thisV.state.strgrouping.onSubItog) {
-                thisV.state.strgrouping.onSubItog[prop].res=initOneSubItog(tekTr);
-                thisV.state.strgrouping.onSubItog[prop].count=1;
+              for (let propIn in thisV.state.strgrouping.onSubItog) {
+                thisV.state.strgrouping.onSubItog[propIn].res=initOneSubItog(tekTr);
+                thisV.state.strgrouping.onSubItog[propIn].count=1;
                 const trItogBlankOne=$(trItogBlank).clone();
                 let prBeforeIDTd=true,
                     colspanTrTek=0;
                 $(trItogBlankOne).find('td.td_str_val').each(function(i,elem) {
                     if (prBeforeIDTd) {
-                      if (elem.id!==prop) {
+                      if (elem.id!==propIn) {
                         $(elem).attr('colspan',++colspanTrTek);
                         $(elem).remove();
                       }
@@ -221,8 +221,8 @@ class TableOLAP extends React.Component {
                 $(trItogBlankOne).find('td.td_val_val').each(function(i,elem) {
                   $(elem).attr('id',indexRow[i]);
                 });
-                $(trItogBlankOne).attr('pritog','').attr('itogid',prop);
-                thisV.state.strgrouping.onSubItog[prop].itogBlankInit=trItogBlankOne;
+                $(trItogBlankOne).attr('pritog','').attr('itogid',propIn);
+                thisV.state.strgrouping.onSubItog[propIn].itogBlankInit=trItogBlankOne;
               };
             }
           }
@@ -232,8 +232,8 @@ class TableOLAP extends React.Component {
               const tdStrVal=$(resItogAll.itogBlank).find('td.td_str_val'),
                     tekTdItog=$(tdStrVal).first();
               $(tekTdItog).attr('colspan',tdStrVal.length);
-              for (var i = (tdStrVal.length-1); i >0; i--) {
-                $(tdStrVal[i]).remove();
+              for (var ir = (tdStrVal.length-1); ir >0; ir--) {
+                $(tdStrVal[ir]).remove();
               }
 
               //инициализируем подсчет общих итогов
@@ -368,7 +368,7 @@ class TableOLAP extends React.Component {
             thisV.state.strgrouping.onSubItog[itogID]=thisItog;
 
             //необходимо всем идущим до этого объединениям увеличить rowspan на единицу, если сворачиваем, то просто считает на спец.атрибуте
-            for (var i4 = (i3-1); i4>=0; i4--) {
+            for (let i4 = (i3-1); i4>=0; i4--) {
               let dopRowspan;
               dopRowspan=+$(tabTrFirstTdMass[i4]).attr(nameRowspan);
               if (isNaN(dopRowspan)) {
@@ -642,7 +642,7 @@ class TableOLAP extends React.Component {
       //признак что можно делать переносы между категориями(осями:показатели/строки/значения показателей)
       let prOk=true;
 
-      if (idIn==idOut) {
+      if (idIn===idOut) {
           return;
       }
 
@@ -731,7 +731,6 @@ class TableOLAP extends React.Component {
         const data=this.state.data;
         data.tab_id= this.props.obj.id;
         let thisV=this;
-        const time00=performance.now();
         if (!!this.props.obj.stateLoadObj) {
             this.props.obj.stateLoadObj.current.handleShow();
         }
@@ -905,7 +904,7 @@ class TableOLAP extends React.Component {
           }
           const posCursor=getCursorPosition(e);
           const b_tab=$(".divForTableOLAP[id='"+thisV.props.obj.id+"']");
-          const contextMenu=$(b_tab).find('div.divContextMenu')
+          $(b_tab).find('div.divContextMenu')
                   .css({left:posCursor.x,top:posCursor.y})
                   .attr('idTabVal',idC)
                   .html('<p class="label">Вариант агригирования:</p>'+
@@ -1279,7 +1278,7 @@ class TableOLAP extends React.Component {
           tekTd=$(tekTrOld).find('#'+thisID+'.td_str_val');
           const tdRowspanAbove={};
           tdRowspanAbove[tekTd[0].id]=tekTd[0];
-          for (var i4 = (i0-1); i4>=0; i4--) {
+          for (let i4 = (i0-1); i4>=0; i4--) {
             let prevTr=$(tekTrOld),
                 prevTrTd=$(prevTr).find('td.td_str_val[id="'+tdStrName[i4].id+'"]');
             //ищем ближайшую подходящую строку
@@ -1421,7 +1420,6 @@ class TableOLAP extends React.Component {
           }
 
           let tdStrVal=$(tekTrNew).find('td.td_str_val').clone();
-          const trPrevClone=$(tekTrNew).clone();
           $(tekTrNew).html(tekTr[0].innerHTML);
           const tekTrNewTdFirst=$(tekTrNew).find('td.td_str_val[id="'+thisID+'"]:first');
           $(tekTrNewTdFirst).html(tekTdNew.innerHTML)

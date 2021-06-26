@@ -1,4 +1,4 @@
-import React,{ useState,useRef,useEffect,useReducer } from 'react';
+import React,{ useState,useRef } from 'react';
 
 import Loading from '../../components/Loading';
 import AlertPlus from '../../components/AlertPlus';
@@ -10,13 +10,11 @@ import BootstrapInput from '../../components/BootstrapInput';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Multiselect from 'react-bootstrap-multiselect';
-import 'react-bootstrap-multiselect/css/bootstrap-multiselect.css';
 //import InputGroup from 'react-bootstrap/InputGroup';
 
 import $ from 'jquery'
 
-import {getSQLRun,getHashPwd,getDiffArray} from '../../system.js';
+import {getSQLRun,getHashPwd} from '../../system.js';
 
 function Users() {
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)

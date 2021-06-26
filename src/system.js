@@ -488,7 +488,7 @@ export function getCursorPosition(e) {
   let posx = 0,
       posy = 0;
 
-  if (!e) var e = window.event;
+  if (!e) e = window.event;
 
   if (e.pageX || e.pageY) {
     posx = e.pageX;

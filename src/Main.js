@@ -1,7 +1,6 @@
-import React,{ useState } from 'react';
+import React from 'react';
 import {Switch,Route} from 'react-router-dom'
 import { useIntl } from 'react-intl';
-//import SwitchR from 'react-switch';
 import { CgMenuRound } from 'react-icons/cg';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -9,7 +8,7 @@ import logo from './img/logo.png';
 
 import Admin_users from './forms/admin/Users';
 import CalcOLAP from './forms/CalcOLAP';
-import {getAuth,getCheckRight} from './system.js';
+/*import {getAuth,getCheckRight} from './system.js';*/
 
 
 const Main = ({

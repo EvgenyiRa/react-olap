@@ -7,14 +7,11 @@ import BootstrapInput from '../components/BootstrapInput';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { format,startOfMonth } from 'date-fns';
+/*import { format,startOfMonth } from 'date-fns';*/
 
-import $ from 'jquery'
-
-import {getExecQuery,getHashPwd,getSQLRun} from '../system.js';
+import $ from 'jquery';
 
 function CalcOLAP() {
-  const newDate=new Date();
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
   let [paramGroupV, setParamGroupV] = useState({begDate:/*format(startOfMonth(newDate),'yyyy-MM-dd')*/'2020-09-01',endDate:'2020-09-02'/*format(newDate,'yyyy-MM-dd')*/});
   //хук-ссылки на элементы для удобной работы с ними

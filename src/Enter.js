@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './styles/enter.css';
 import EnterLogin from './img/enter_login.png';
 import EnterPassword from './img/enter_password.png';
 import {setAuth} from './system.js';
-import {Switch,Route} from 'react-router-dom';
 
 function Enter({setIsAuth}) {
   let [resultAuth,setResultAuth]=useState(null);

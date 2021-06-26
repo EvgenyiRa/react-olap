@@ -1,4 +1,4 @@
-export default {
+const messages={
   ru: {
     title: 'WEB-OLAP',
     sidebarTitle: 'Меню',
@@ -38,3 +38,4 @@ export default {
     viewSource: 'View Source',
   },
 };
+export default messages;
