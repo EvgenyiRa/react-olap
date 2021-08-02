@@ -14,7 +14,7 @@ import Col from 'react-bootstrap/Col';
 
 import $ from 'jquery'
 
-import {getExecQuery,getHashPwd,getQuery} from '../../common.js';
+import {getSQLRun2,getHashPwd,getSQLRun} from '../../system.js';
 
 function Users() {
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
@@ -94,7 +94,7 @@ function Users() {
           data1.params.user_id=data.exec_params_in['user_id'];
           data1.sql+=` AND USER_ID!=:user_id`;
         }
-        getQuery(data1,(response1)=> {
+        getSQLRun(data1,(response1)=> {
                   if (response1.data[0].COUNT>0) {
                       refInputLogin.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
                   }
@@ -121,7 +121,7 @@ function Users() {
                                      function(response) {
                                        data.exec_params_in['password']=response.hash;
                                        data.exec_params_in['sol']=response.sol;
-                                       getExecQuery(data,
+                                       getSQLRun2(data,
                                                     function(response0) {
                                                        const newUsers=[...refSelectUser.current.state.options,{label:data.exec_params_in['fio'],value:response0.data.execout['user_id']}];
                                                        refSelectUser.current.setState({options:newUsers});
@@ -157,7 +157,7 @@ function Users() {
                                                PHONE=:phone
                                          WHERE USER_ID=:user_id`;
                          function updUser() {
-                           getExecQuery(data,
+                           getSQLRun2(data,
                                         function(response0) {
                                            //находим пользователя в списке, правим фамилию на случай если изменили
                                            const newUsers=[...refSelectUser.current.state.options];
@@ -322,7 +322,7 @@ function Users() {
           data1.params.right_id=data.exec_params_in['right_id'];
           data1.sql+=` AND RIGHTS_ID!=:right_id`;
         }
-        getQuery(data1,(response1)=> {
+        getSQLRun(data1,(response1)=> {
                   if (response1.data[0].COUNT>0) {
                       refInputRightSysName.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
                   }
@@ -333,7 +333,7 @@ function Users() {
                                            RETURNING RIGHTS_ID INTO :right_id`;
                            data.exec_params_out=[];
                            data.exec_params_out.push({name:'right_id',type:'number'});
-                           getExecQuery(data,
+                           getSQLRun2(data,
                                         function(response0) {
                                            const newRights=[...refSelectRight.current.state.options,{label:data.exec_params_in['rightName'],value:response0.data.execout['right_id']}];
                                            refSelectRight.current.setState({options:newRights});
@@ -350,7 +350,7 @@ function Users() {
                         data.execsql=`UPDATE REP_RIGHTS
                                          SET NAME=:rightName, SYSNAME=:rightSysName
                                        WHERE RIGHTS_ID=:right_id`;
-                         getExecQuery(data,
+                         getSQLRun2(data,
                                       function(response0) {
                                          const newRights=[...refSelectRight.current.state.options];
                                          for (var i = 0; i < newRights.length; i++) {
@@ -382,7 +382,7 @@ function Users() {
       data1.sql=`SELECT SYSNAME
                    FROM REP_RIGHTS
                   WHERE RIGHTS_ID=:right_id`;
-      getQuery(data1,(response1) => {
+      getSQLRun(data1,(response1) => {
           $('input#'+refInputRightSysName.current.props.obj.id).val(response1.data[0].SYSNAME);
           refInputRightSysName.current.setState({value:response1.data[0].SYSNAME});
       });
@@ -536,7 +536,7 @@ function Users() {
                                                                                 WHERE USER_ID=:user_id;
                                                                               END;`;
                                                                 data.exec_params_in['user_id']=+user_id;
-                                                                getExecQuery(data,
+                                                                getSQLRun2(data,
                                                                              function(response0) {
                                                                                 //находим пользователя в списке, удаляем
                                                                                 const newUsers=[...refSelectUser.current.state.options];
@@ -592,7 +592,7 @@ function Users() {
                                                                                    WHERE RIGHTS_ID=:right_id;
                                                                                  END;`;
                                                                    data.exec_params_in['right_id']=+right_id;
-                                                                   getExecQuery(data,
+                                                                   getSQLRun2(data,
                                                                                 function(response0) {
                                                                                   //находим право в списке, удаляем
                                                                                   const newRights=[...refSelectRight.current.state.options];
@@ -642,7 +642,7 @@ function Users() {
                        }
                        data.exec_params_in['user_id']=+user_id;
                        data.exec_params_in['right_id']=+right_id;
-                       getExecQuery(data,
+                       getSQLRun2(data,
                                     function(response0) {
                                        console.log(response0.data);
                                     }
