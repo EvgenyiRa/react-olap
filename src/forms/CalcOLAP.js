@@ -7,11 +7,13 @@ import BootstrapInput from '../components/BootstrapInput';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import {getDBType} from '../system.js';
 /*import { format,startOfMonth } from 'date-fns';*/
 
 import $ from 'jquery';
 
 function CalcOLAP() {
+  const dbType=getDBType();
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
   let [paramGroupV, setParamGroupV] = useState({begDate:/*format(startOfMonth(newDate),'yyyy-MM-dd')*/'2020-09-01',endDate:'2020-09-02'/*format(newDate,'yyyy-MM-dd')*/});
   //хук-ссылки на элементы для удобной работы с ними
@@ -54,12 +56,12 @@ function CalcOLAP() {
     setParamGroup:setParamGroupV,
     parParentID:['begDate','endDate'],
     data:{params_val: {},
-          sql_true: `SET DATEFORMAT YMD;
-                     WITH T AS (
+          sql_true: ((dbType=='mssql')?`SET DATEFORMAT YMD;`:``)+
+                     `WITH T AS (
                       SELECT *
-                       FROM [REP_CALC_OLAP]
-                      WHERE INVOICE_DATE >= @begDate
-                        AND INVOICE_DATE <= @endDate
+                       FROM REP_CALC_OLAP
+                      WHERE INVOICE_DATE >= `+((dbType=='mssql')?`@begDate`:`TO_DATE(:begDate,'YYYY-MM-DD')`)+`
+                        AND INVOICE_DATE <= `+((dbType=='mssql')?`@endDate`:`TO_DATE(:endDate,'YYYY-MM-DD')`)+`
                       )
                       SELECT contract_refid
                              ,jur_ls_refid
