@@ -262,7 +262,12 @@ export function getSQLRun(data,callback,stateLoadObj) {
             localStorage.setItem('tokenOne', response.data.tokenOne);
             const responseNew={data:response.data.rows};
             if (!!response.data.output) {
-                responseNew.output=response.data.output
+                //для mssql
+                responseNew.output=response.data.output;
+            }
+            else if (!!response.data.data) {
+                //для mysql
+                responseNew.data=response.data.data;
             }
             callback(responseNew);
           }
@@ -332,7 +337,7 @@ export function getSQLRun2(data,callback,stateLoadObj) {
               response.data=responseDR;
               callback(response);
             }
-            else if (dbtype==='mssql') {
+            else if ((dbtype==='mssql') || (dbtype==='mysql')) {
               let responseNew={result:response.data.result}
               callback(responseNew);
             }
