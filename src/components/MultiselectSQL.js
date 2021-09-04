@@ -1,6 +1,6 @@
 import React from 'react';
 import Multiselect from 'react-bootstrap-multiselect';
-import {getParamForSQL,getParamDiff,getSQLRun} from '../system.js';
+import {getParamForSQL,getParamDiff,getSQLRun,getDBType} from '../system.js';
 import 'react-bootstrap-multiselect/css/bootstrap-multiselect.css';
 
 class MultiselectSQL extends React.Component {
@@ -15,6 +15,7 @@ class MultiselectSQL extends React.Component {
         checkedOptions: undefined
       }
       this.getOptionsBySQL = this.getOptionsBySQL.bind(this);
+      this.dbtype=getDBType();
   }
 
   handleChange(option, checked) {
@@ -35,7 +36,12 @@ class MultiselectSQL extends React.Component {
   getOptionsBySQL() {
     const val=this;
     var data = {};
-    data.params={};
+    if (this.dbtype==='mysql') {
+        data.params=[];
+    }
+    else {
+        data.params={};
+    }
     data.sql=val.props.obj.sql;
     getParamForSQL(val.props.obj.paramGroup,val.props.obj.parParentID,data);
     getSQLRun(data,(response)=> {

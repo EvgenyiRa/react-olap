@@ -146,7 +146,8 @@ export function delAuth(prReload) {
 
 export function getParamForSQL(paramGroup,parParentID,data) {
       if ((!!paramGroup) & (!!parParentID)) {
-        parParentID.forEach(function(item) {
+        if (dbtype!=='mysql') {
+          parParentID.forEach(function(item) {
             if (!Array.isArray(paramGroup[item])) {
               data.params[item]=paramGroup[item];
             }
@@ -176,7 +177,70 @@ export function getParamForSQL(paramGroup,parParentID,data) {
                     }
                 }
             }
-        });
+          });
+        }
+        else {
+          //для mysql параметры для запроса передаются знаком "?",
+          //нет четкой привязки параметру, поэтому необходимо повторяющиеся параметры передать столько раз,
+          //сколько они повторяются строго в последовательности, которой встречаются
+          function pos_sl_simv(sql_true_v,pos_v) {
+              var mass_simv=['+',' ',',',')','(',';','&','%','\'','=','|','\n','\r'];
+              var pos_simv=77777;
+              mass_simv.forEach(function(element) {
+                  var pos_pr_v=sql_true_v.indexOf(element,(pos_v+1));
+                  if ((pos_pr_v<pos_simv) & (pos_pr_v!=-1)) {
+                      pos_simv=pos_pr_v;
+                  }
+              });
+              return pos_simv;
+          }
+
+          const calc_one_param=()=> {
+            if (pos>-1) {
+                let pos_pr=pos_sl_simv(data.sql,pos),
+                    tek_param;
+                if (pos_pr===77777) {
+                    tek_param=data.sql.substring((pos+1));
+                }
+                else {
+                    tek_param=data.sql.substring((pos+1),(pos_pr));
+                }
+
+                if (tek_param in paramGroup) {
+                    let p_one_str_for_sql='?';
+                    if (Array.isArray(paramGroup[tek_param])) {
+                        if (paramGroup[tek_param].length>0) {
+                          data.params.push(paramGroup[tek_param][0]);
+                          for (var i = 1; i < paramGroup[tek_param].length; i++) {
+                            data.params.push(paramGroup[tek_param][i]);
+                            p_one_str_for_sql+=',?';
+                          }
+                        }
+                        else {
+                          data.params.push(null);
+                        }
+                    }
+                    else {
+                        data.params.push(paramGroup[tek_param]);
+                    }
+                    data.sql=data.sql.substring(0,pos)+p_one_str_for_sql+data.sql.substring(pos+tek_param.length+1);
+                    pos+=p_one_str_for_sql.length;
+                }
+                else {
+                  alert('Не найден параметр для подстановки');
+                }
+            }
+          }
+
+          let pos = data.sql.indexOf(":"); // находим первое совпадение
+          //console.log(pos);
+          calc_one_param();
+          while ( pos != -1 ) { // до тех пор, пока не перестанут попадаться совпадения (т.е. indexOf не вернёт -1)
+             pos = data.sql.indexOf(":",pos+1); // находим следующее значение нужного слова (indexOf ищет начиная с позиции, переданной вторым аргументом)
+             calc_one_param();
+          }
+
+        }
       }
 }
 
