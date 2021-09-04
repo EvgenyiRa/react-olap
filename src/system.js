@@ -325,13 +325,13 @@ export function getSQLRun(data,callback,stateLoadObj) {
             //set_cookie('tokenOne',response.data.tokenOne, houreLifeCookies);
             localStorage.setItem('tokenOne', response.data.tokenOne);
             const responseNew={data:response.data.rows};
-            if (!!response.data.output) {
+            if ((!!response.data.output) & (dbtype==='mssql')) {
                 //для mssql
                 responseNew.output=response.data.output;
             }
-            else if (!!response.data.data) {
+            else if ((!!response.data.data) & (dbtype==='mysql')) {
                 //для mysql
-                responseNew.data=response.data.data;
+                responseNew.dataFields=response.data.data;
             }
             callback(responseNew);
           }
