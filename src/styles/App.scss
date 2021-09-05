@@ -510,7 +510,7 @@ margin:0;
 left:100%;
 }
 
-ul.tableDBdopAction.ul_cons.second-level {
+ul.tableSQLdopAction.ul_cons.second-level {
   width: max-content;
   max-width: 21em;
   text-align: left;
@@ -520,7 +520,7 @@ ul.tableDBdopAction.ul_cons.second-level {
   display: none;
 }
 
-ul.tableDBdopAction.ul_cons.second-level li {
+ul.tableSQLdopAction.ul_cons.second-level li {
   height: 1.5em;
   width: 100%;
   background: white;
@@ -528,9 +528,19 @@ ul.tableDBdopAction.ul_cons.second-level li {
   border-bottom-color: white;
 }
 
-ul.tableDBdopAction.ul_cons.second-level li a {
+ul.tableSQLdopAction.ul_cons.second-level li a {
   margin: 0 0.3em 0 0.3em;
   float:left;
+}
+
+div.react-bootstrap-table-pagination {
+  display: block;
+}
+
+div.react-bootstrap-table-pagination div[class^="col-"],
+div.react-bootstrap-table-pagination div.react-bootstrap-table-pagination-list {
+    display: inline-block;
+    width: auto;
 }
 
 .third-level:before {
