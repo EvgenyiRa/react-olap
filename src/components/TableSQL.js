@@ -151,7 +151,7 @@ class TableSQL extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         // Популярный пример (не забудьте сравнить пропсы):
         //console.log(this.props);
-        if (getParamDiff(this.props.obj.paramGroup,prevProps.obj.paramGroup,this.props.obj.parParentID,this.props.obj.tabEventKey)) {
+        if (getParamDiff(this.props.obj.paramGroup,prevProps.obj.paramGroup,this.props.obj.parParentID)) {
             this.getRowsBySQL();
         }
       }

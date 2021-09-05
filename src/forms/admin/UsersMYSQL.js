@@ -14,6 +14,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import {getDBType,getSQLRun} from '../../system.js';
+import filterFactory, { textFilter } from 'react-bootstrap-table2-filter';
 /*import { format,startOfMonth } from 'date-fns';*/
 
 import $ from 'jquery';
@@ -21,7 +22,7 @@ import $ from 'jquery';
 function Users() {
   const dbType=getDBType();
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
-  let [paramGroupV, setParamGroupV] = useState({users:[]});
+  let [paramGroupV, setParamGroupV] = useState({rights:[]});
   //хук-ссылки на элементы для удобной работы с ними
   const refAlertPlus=useRef(),
         refConfirmPlus=useRef(),
@@ -31,21 +32,18 @@ function Users() {
 
   const tabUser='table#tab1 tbody';
 
-  //объект для выпадающего списка с данными из БД
-  const selectUserObj={stateLoadObj:refLoading,
-                        label:'Пользователи',
-                        paramGroup:paramGroupV,
-                        setParamGroup:setParamGroupV,
-                        //наименование параметра для зависимых(дочерних) элементов
-                        parChealdID:"users",
-                        //необходимо наличие двух полей с именами value,label
-                        sql:`SELECT DISTINCT
-                                    R.USER_ID "value",
-                                    R.FIO "label"
-                                FROM REP_USERS R
-                                ORDER BY R.FIO`,
-                        multiple:true
-                       };
+  //объект для выпадающего списка с правами из БД
+   const selectRightObj={stateLoadObj:refLoading,
+                         label:'Права',
+                         paramGroup:paramGroupV,
+                         setParamGroup:setParamGroupV,
+                         //наименование параметра для зависимых(дочерних) элементов
+                         parChealdID:"rights",
+                         //необходимо наличие двух полей с именами value,label
+                         sql:`select T.RIGHTS_ID "value",T.NAME "label"
+                                from REP_RIGHTS t`,
+                         multiple:true
+                        };
 
 //объект для таблицы с данными из БД
 const tableSQLObj={stateLoadObj:refLoading,
@@ -53,7 +51,7 @@ const tableSQLObj={stateLoadObj:refLoading,
    bodyClasses:'body_row_dblclick',
    tab_id:"tab1",
    paramGroup:paramGroupV,
-   parParentID:['users'],
+   parParentID:['rights'],
    sql:`SELECT U.FIO,
                U.USER_ID,
                U.LOGIN,
@@ -61,12 +59,14 @@ const tableSQLObj={stateLoadObj:refLoading,
                U.EMAIL,
                U.PHONE
          FROM REP_USERS U
-         WHERE (U.USER_ID IN (:users) OR COALESCE(:users,-777)=-777)
+         WHERE U.USER_ID IN (SELECT RU.USER_ID
+                               FROM rep_users_rights RU
+                              WHERE RU.RIGHT_ID IN (:rights) OR COALESCE(:rights,-777)=-777
+                            )
          ORDER BY U.LOGIN`,
    afterLoadRows:(thisV)=>{
        thisV.state.selectRowFull=[];
        const newObj={...paramGroupV};
-       newObj.userTab=-777;
        $(tabUser).find('tr.checked').removeClass('checked');
        setParamGroupV(newObj);
    },
@@ -76,12 +76,10 @@ const tableSQLObj={stateLoadObj:refLoading,
       const tr=$(e.target).closest('tr'),
             newObj={...paramGroupV};
       if ($(tr).hasClass('checked')) {
-         newObj.userTab=-777;
          refTableSQL.current.state.selectRowFull=[];
          $(tr).removeClass('checked');
       }
       else {
-        newObj.userTab=row[refTableSQL.current.props.obj.keyField];
         refTableSQL.current.state.selectRowFull=row;
         $(tabUser).find('tr.checked').removeClass('checked');
         $(tr).addClass('checked');
@@ -151,8 +149,8 @@ const tableSQLObj={stateLoadObj:refLoading,
                      },
    componentDidMount:(thisV)=>{
        thisV.getRowsBySQL();
-   }
-   //filterFactory:filterFactory,
+   },
+   filterFactory:filterFactory
   };
 
   //получение объекта модального окна для работы с пользователями и их правами (добавление,редактирование)
@@ -168,7 +166,7 @@ const tableSQLObj={stateLoadObj:refLoading,
       <Container fluid>
         <Row>
           <Col>
-            <MultiselectSQL obj={selectUserObj}/>
+            <MultiselectSQL obj={selectRightObj}/>
           </Col>
         </Row>
         <Row style={{marginTop:'1rem'}}>
