@@ -386,14 +386,8 @@ div.menu-close svg {
     box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 
-button.react-bootstrap-table-but-searche {
-    position: absolute;
-    top: 0.25rem;
-    left: -1.75em;
-    width: 2.5em;
-    border: 1px solid #6c757d;
-    border-radius: .25rem;
-    background-color: transparent;
+div.react-bootstrap-table {
+  position: relative;
 }
 
 div.react-bootstrap-table table tbody td {
@@ -541,6 +535,16 @@ div.react-bootstrap-table-pagination div[class^="col-"],
 div.react-bootstrap-table-pagination div.react-bootstrap-table-pagination-list {
     display: inline-block;
     width: auto;
+}
+
+button.react-bootstrap-table-but-searche {
+    position: absolute;
+    top: 2.2rem;
+    left: -3rem;
+    width: 2.5em;
+    border: 1px solid #6c757d;
+    border-radius: .25rem;
+    background-color: transparent;
 }
 
 .third-level:before {
