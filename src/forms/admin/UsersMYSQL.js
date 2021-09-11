@@ -10,7 +10,7 @@ import MultiselectSQL from '../../components/MultiselectSQL';
 import TableSQL from '../../components/TableSQL';
 import Container from 'react-bootstrap/Container';
 import paginationFactory from 'react-bootstrap-table2-paginator';
-import Checkbox from '@material-ui/core/Checkbox';
+import CheckboxMUI from '../../components/CheckboxMUI';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import {getDBType,getSQLRun,getHashPwd} from '../../system.js';
@@ -309,45 +309,59 @@ function Users() {
     }
     //получение объекта модального окна для работы с правами (добавление,редактирование)
     const getWinModalRights=(type) => {
-    const handleButtonNextL=() => {
-      let data={};
-      data.exec_params_in={};
-      data.exec_params_in['rightName']=refInputRightName.current.state.value;
-      data.exec_params_in['rightSysName']=refInputRightSysName.current.state.value;
-      let prErr=false;
-      if ((!!!refInputRightName.current.state.value) || (!!!refInputRightSysName.current.state.value)) {
-        prErr=true;
-        if (!!!refInputRightName.current.state.value) {
-          refInputRightName.current.setState({isInvalid:true,invalidText:'Поле обязательно к заполнению'});
+      const handleButtonNextL=() => {
+        let data={};
+        data.exec_params_in={};
+        data.exec_params_in['rightName']=refInputRightName.current.state.value;
+        data.exec_params_in['rightSysName']=refInputRightSysName.current.state.value;
+        let prErr=false;
+        if ((!!!refInputRightName.current.state.value) || (!!!refInputRightSysName.current.state.value)) {
+          prErr=true;
+          if (!!!refInputRightName.current.state.value) {
+            refInputRightName.current.setState({isInvalid:true,invalidText:'Поле обязательно к заполнению'});
+          }
+          if (!!!refInputRightSysName.current.state.value) {
+            refInputRightSysName.current.setState({isInvalid:true,invalidText:'Поле обязательно к заполнению'});
+          }
         }
-        if (!!!refInputRightSysName.current.state.value) {
-          refInputRightSysName.current.setState({isInvalid:true,invalidText:'Поле обязательно к заполнению'});
-        }
-      }
-      if (!prErr) {
-        //проверяем существование права с введенными наименованиями
-        let data1={};
-        data1.params={sysname:data.exec_params_in['rightSysName']};
-        //let resp_data;
-        data1.sql=`SELECT COUNT(1) COUNT
-                     FROM REP_RIGHTS
-                    WHERE SYSNAME=:sysname`;
-        if (type==='edit') {
-          data.exec_params_in['right_id']=refTableRight.current.state.selectRowFull['RIGHTS_ID'];
-          data1.params.right_id=data.exec_params_in['right_id'];
-          data1.sql+=` AND RIGHTS_ID!=:right_id`;
-        }
-        getSQLRun(data1,(response1)=> {
-                  if (response1.data[0].COUNT>0) {
-                      refInputRightSysName.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
-                  }
-                  else {
-                    if (type==='add') {
+        if (!prErr) {
+          //проверяем существование права с введенными наименованиями
+          let data1={};
+          data1.params={sysname:data.exec_params_in['rightSysName']};
+          //let resp_data;
+          data1.sql=`SELECT COUNT(1) COUNT
+                       FROM REP_RIGHTS
+                      WHERE SYSNAME=:sysname`;
+          if (type==='edit') {
+            data.exec_params_in['right_id']=refTableRight.current.state.selectRowFull['RIGHTS_ID'];
+            data1.params.right_id=data.exec_params_in['right_id'];
+            data1.sql+=` AND RIGHTS_ID!=:right_id`;
+          }
+          getSQLRun(data1,(response1)=> {
+                    if (response1.data[0].COUNT>0) {
+                        refInputRightSysName.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
+                    }
+                    else {
+                      if (type==='add') {
+                          if (!prErr) {
+                            data.execsql=`INSERT INTO REP_RIGHTS (RIGHTS_ID, NAME, SYSNAME) VALUES (REP_RIGHTS_ID_SQ.NEXTVAL, :rightName, :rightSysName)
+                                            RETURNING RIGHTS_ID INTO :right_id`;
+                             data.exec_params_out=[];
+                             data.exec_params_out.push({name:'right_id',type:'number'});
+                             getSQLRun(data,
+                                          function(response0) {
+                                             refTableRight.current.getRowsBySQL();
+                                             refWinModalRigth.current.setState({modalShow:false});
+                                          },
+                                          refLoading
+                                        );
+                          }
+                      }
+                      else if (type==='edit') {
                         if (!prErr) {
-                          data.execsql=`INSERT INTO REP_RIGHTS (RIGHTS_ID, NAME, SYSNAME) VALUES (REP_RIGHTS_ID_SQ.NEXTVAL, :rightName, :rightSysName)
-                                          RETURNING RIGHTS_ID INTO :right_id`;
-                           data.exec_params_out=[];
-                           data.exec_params_out.push({name:'right_id',type:'number'});
+                          data.execsql=`UPDATE REP_RIGHTS
+                                           SET NAME=:rightName, SYSNAME=:rightSysName
+                                         WHERE RIGHTS_ID=:right_id`;
                            getSQLRun(data,
                                         function(response0) {
                                            refTableRight.current.getRowsBySQL();
@@ -356,78 +370,64 @@ function Users() {
                                         refLoading
                                       );
                         }
-                    }
-                    else if (type==='edit') {
-                      if (!prErr) {
-                        data.execsql=`UPDATE REP_RIGHTS
-                                         SET NAME=:rightName, SYSNAME=:rightSysName
-                                       WHERE RIGHTS_ID=:right_id`;
-                         getSQLRun(data,
-                                      function(response0) {
-                                         refTableRight.current.getRowsBySQL();
-                                         refWinModalRigth.current.setState({modalShow:false});
-                                      },
-                                      refLoading
-                                    );
                       }
                     }
-                  }
-                },
-                refLoading
-              );
+                  },
+                  refLoading
+                );
+        }
+      }
+      return {
+          modalShow:true,
+          header:(type==='add')?'Добавление права':'Редактирование права',
+          nextButtonLabel:(type==='add')?'Добавить':'Изменить',
+          handleButtonNext:handleButtonNextL,
+          body:<Container fluid>
+                  <Row>
+                    <Col>
+                      <BootstrapInput
+                        ref={refInputRightName}
+                        obj={{
+                          label:'Наименование права',
+                          id:"rightName",
+                          onChange:(event,thisV) => {
+                              let valueL=String(event.target.value).trim();
+                              if (thisV.state.isInvalid) {
+                                if (valueL!=='') {
+                                    thisV.setState({isInvalid:false});
+                                }
+                              }
+                              thisV.setState({value:valueL});
+                          },
+                          defaultValue:(type==='edit')?refTableRight.current.state.selectRowFull['NAME']:null
+                        }}
+                      />
+                    </Col>
+                  </Row>
+                  <Row style={{marginTop:'1rem'}}>
+                    <Col>
+                      <BootstrapInput
+                        ref={refInputRightSysName}
+                        obj={{
+                          label:'Сис.наименование права',
+                          id:"rightSysName",
+                          onChange:(event,thisV) => {
+                              let valueL=String(event.target.value).trim();
+                              if (thisV.state.isInvalid) {
+                                if (valueL!=='') {
+                                    thisV.setState({isInvalid:false});
+                                }
+                              }
+                              thisV.setState({value:valueL});
+                          },
+                          defaultValue:(type==='edit')?refTableRight.current.state.selectRowFull['SYSNAME']:null
+                        }}
+                      />
+                    </Col>
+                  </Row>
+                </Container>
       }
     }
-    return {
-        modalShow:true,
-        header:(type==='add')?'Добавление права':'Редактирование права',
-        nextButtonLabel:(type==='add')?'Добавить':'Изменить',
-        handleButtonNext:handleButtonNextL,
-        body:<Container fluid>
-                <Row>
-                  <Col>
-                    <BootstrapInput
-                      ref={refInputRightName}
-                      obj={{
-                        label:'Наименование права',
-                        id:"rightName",
-                        onChange:(event,thisV) => {
-                            let valueL=String(event.target.value).trim();
-                            if (thisV.state.isInvalid) {
-                              if (valueL!=='') {
-                                  thisV.setState({isInvalid:false});
-                              }
-                            }
-                            thisV.setState({value:valueL});
-                        },
-                        defaultValue:(type==='edit')?refTableRight.current.state.selectRowFull['NAME']:null
-                      }}
-                    />
-                  </Col>
-                </Row>
-                <Row style={{marginTop:'1rem'}}>
-                  <Col>
-                    <BootstrapInput
-                      ref={refInputRightSysName}
-                      obj={{
-                        label:'Сис.наименование права',
-                        id:"rightSysName",
-                        onChange:(event,thisV) => {
-                            let valueL=String(event.target.value).trim();
-                            if (thisV.state.isInvalid) {
-                              if (valueL!=='') {
-                                  thisV.setState({isInvalid:false});
-                              }
-                            }
-                            thisV.setState({value:valueL});
-                        },
-                        defaultValue:(type==='edit')?refTableRight.current.state.selectRowFull['SYSNAME']:null
-                      }}
-                    />
-                  </Col>
-                </Row>
-              </Container>
-    }
-  }
     //объект для таблицы с данными из БД
     const tableSQLRightsObj={
        stateLoadObj:refLoading,
@@ -471,7 +471,9 @@ function Users() {
                            R.SYSNAME,
                             R.RIGHTS_ID,
                             0 VALUE,
-                            1 DISABLED
+                            CASE WHEN 'add'='`+type+`' THEN 0
+                              ELSE 1
+                            END DISABLED
                       FROM REP_RIGHTS R
                      WHERE :currentUser=-777
                   ) T
@@ -506,30 +508,13 @@ function Users() {
                formatter:(cell, row, rowIndex)=> {
                   if (+row['DISABLED']!==1) {
                     return (
-                        <Checkbox
-                          checked={(+cell===1)}
-                          onChange={(event) => {
-                            let data={};
-                            data.exec_params_in={};
-                            if (event.target.checked) {
-                                data.execsql=`INSERT INTO REP_USERS_RIGHTS (RUR_ID, USER_ID, RIGHT_ID)
-                                                   VALUES (REP_USERS_RIGHTS_ID_SQ.NEXTVAL, :user_id,:right_id)`;
+                        <CheckboxMUI obj={{
+                            beginChecked:+cell===1,
+                            onChange:(e,thisV)=> {
+                                refTableRight.current.state.rows[rowIndex]['VALUE']=(e.target.checked)?1:0;
+                                thisV.setState({checked:e.target.checked})
                             }
-                            else {
-                                data.execsql=`DELETE FROM REP_USERS_RIGHTS
-                                               WHERE USER_ID=:user_id AND RIGHT_ID=:right_id`;
-                            }
-                            data.exec_params_in['user_id']=+paramGroupV.userTab;
-                            data.exec_params_in['right_id']=+row['RIGHTS_ID'];
-                            getSQLRun(data,
-                                         function(response0) {
-                                            console.log(response0.data);
-                                            refTableRight.current.getRowsBySQL();
-                                         }
-                                       );
                           }}
-                          id={'checkRight-'+row['RIGHTS_ID']}
-                          color="primary"
                         />
                     );
                   }
