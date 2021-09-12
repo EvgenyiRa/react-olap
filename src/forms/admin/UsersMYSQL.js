@@ -22,7 +22,7 @@ import $ from 'jquery';
 function Users() {
   const dbType=getDBType();
   //хук для отслеживания изменения параметров компонетов (для упрощения взаимодействия компонентов)
-  let [paramGroupV, setParamGroupV] = useState({rights:[],currentUser:-777});
+  let [paramGroupV, setParamGroupV] = useState({rights:[]});
   //хук-ссылки на элементы для удобной работы с ними
   const refAlertPlus=useRef(),
         refConfirmPlus=useRef(),
@@ -74,18 +74,15 @@ function Users() {
                               )
            ORDER BY U.LOGIN`,
      afterLoadRows:(thisV)=>{
-         thisV.state.selectRowFull=[];
-         const newObj={...paramGroupV};
+         thisV.state.selectRowFull=undefined;
          $(tabUser).find('tr.checked').removeClass('checked');
-         setParamGroupV(newObj);
      },
     rowEvents: {
       onClick: (e, row, rowIndex) => {
         //не устраивает работа selectRowProp-onSelect
-        const tr=$(e.target).closest('tr'),
-              newObj={...paramGroupV};
+        const tr=$(e.target).closest('tr');
         if ($(tr).hasClass('checked')) {
-           refTableSQL.current.state.selectRowFull=[];
+           refTableSQL.current.state.selectRowFull=undefined;
            $(tr).removeClass('checked');
         }
         else {
@@ -93,7 +90,6 @@ function Users() {
           $(tabUser).find('tr.checked').removeClass('checked');
           $(tr).addClass('checked');
         }
-        setParamGroupV(newObj);
       }
     },
     keyField:'USER_ID',
@@ -123,7 +119,7 @@ function Users() {
               refWinModal.current.setState(getWinModalUser('add'));
            },
     editRow:(thisV) => {
-            if (thisV.state.selectRowFull.length===0) {
+            if (!!!thisV.state.selectRowFull) {
                 refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
             }
             else {
@@ -131,7 +127,7 @@ function Users() {
             }
           },
     deleteRow:(thisV) => {
-                if (thisV.state.selectRowFull.length===0) {
+                if (!!!thisV.state.selectRowFull) {
                     refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
                 }
                 else {
@@ -309,11 +305,12 @@ function Users() {
     }
     //получение объекта модального окна для работы с правами (добавление,редактирование)
     const getWinModalRights=(type) => {
+      $('div.fade.modal.show:first').hide();
       const handleButtonNextL=() => {
         let data={};
-        data.exec_params_in={};
-        data.exec_params_in['rightName']=refInputRightName.current.state.value;
-        data.exec_params_in['rightSysName']=refInputRightSysName.current.state.value;
+        data.params=[];
+        data.params.push(refInputRightName.current.state.value);
+        data.params.push(refInputRightSysName.current.state.value);
         let prErr=false;
         if ((!!!refInputRightName.current.state.value) || (!!!refInputRightSysName.current.state.value)) {
           prErr=true;
@@ -327,15 +324,15 @@ function Users() {
         if (!prErr) {
           //проверяем существование права с введенными наименованиями
           let data1={};
-          data1.params={sysname:data.exec_params_in['rightSysName']};
+          data1.params=[refInputRightSysName.current.state.value];
           //let resp_data;
           data1.sql=`SELECT COUNT(1) COUNT
                        FROM REP_RIGHTS
-                      WHERE SYSNAME=:sysname`;
+                      WHERE SYSNAME=?`;
           if (type==='edit') {
-            data.exec_params_in['right_id']=refTableRight.current.state.selectRowFull['RIGHTS_ID'];
-            data1.params.right_id=data.exec_params_in['right_id'];
-            data1.sql+=` AND RIGHTS_ID!=:right_id`;
+            data.params.push(refTableRight.current.state.selectRowFull['RIGHTS_ID']);
+            data1.params.push(refTableRight.current.state.selectRowFull['RIGHTS_ID']);
+            data1.sql+=` AND RIGHTS_ID!=?`;
           }
           getSQLRun(data1,(response1)=> {
                     if (response1.data[0].COUNT>0) {
@@ -344,14 +341,12 @@ function Users() {
                     else {
                       if (type==='add') {
                           if (!prErr) {
-                            data.execsql=`INSERT INTO REP_RIGHTS (RIGHTS_ID, NAME, SYSNAME) VALUES (REP_RIGHTS_ID_SQ.NEXTVAL, :rightName, :rightSysName)
-                                            RETURNING RIGHTS_ID INTO :right_id`;
-                             data.exec_params_out=[];
-                             data.exec_params_out.push({name:'right_id',type:'number'});
+                             data.sql=`INSERT INTO REP_RIGHTS (NAME, SYSNAME) VALUES (?, ?)`;
                              getSQLRun(data,
                                           function(response0) {
                                              refTableRight.current.getRowsBySQL();
-                                             refWinModalRigth.current.setState({modalShow:false});
+                                             $('div.fade.modal.show:first').show();
+                                             refWinModalRigth.current.setModalShow(false);
                                           },
                                           refLoading
                                         );
@@ -359,13 +354,14 @@ function Users() {
                       }
                       else if (type==='edit') {
                         if (!prErr) {
-                          data.execsql=`UPDATE REP_RIGHTS
-                                           SET NAME=:rightName, SYSNAME=:rightSysName
-                                         WHERE RIGHTS_ID=:right_id`;
+                          data.sql=`UPDATE REP_RIGHTS
+                                       SET NAME=?, SYSNAME=?
+                                     WHERE RIGHTS_ID=?`;
                            getSQLRun(data,
                                         function(response0) {
                                            refTableRight.current.getRowsBySQL();
-                                           refWinModalRigth.current.setState({modalShow:false});
+                                           $('div.fade.modal.show:first').show();
+                                           refWinModalRigth.current.setModalShow(false);
                                         },
                                         refLoading
                                       );
@@ -382,6 +378,10 @@ function Users() {
           header:(type==='add')?'Добавление права':'Редактирование права',
           nextButtonLabel:(type==='add')?'Добавить':'Изменить',
           handleButtonNext:handleButtonNextL,
+          handleButtonCancel:(thisV)=>{
+            thisV.setModalShow(false);
+            $('div.fade.modal.show:first').show();
+          },
           body:<Container fluid>
                   <Row>
                     <Col>
@@ -429,13 +429,18 @@ function Users() {
       }
     }
     //объект для таблицы с данными из БД
+    let currentUser;
+    if (!!refTableSQL.current.state.selectRowFull) {
+        currentUser=refTableSQL.current.state.selectRowFull['USER_ID']
+    }
+    else {
+        currentUser='-777'
+    };
     const tableSQLRightsObj={
        stateLoadObj:refLoading,
        tableContainerClass:'max-content',
        bodyClasses:'body_row_dblclick',
        tab_id:"tab2",
-       paramGroup:paramGroupV,
-       parParentID:['rights','userTab'],
        sql:`SELECT R.NAME,
                     R.SYSNAME,
                     R.RIGHTS_ID,
@@ -446,7 +451,7 @@ function Users() {
               ON R.RIGHTS_ID=UR.RIGHT_ID
               JOIN REP_USERS U
               ON UR.USER_ID=U.USER_ID
-              WHERE U.USER_ID=:currentUser
+              WHERE U.USER_ID=`+currentUser+`
               UNION ALL
               SELECT *
               FROM (SELECT R.NAME,
@@ -462,7 +467,7 @@ function Users() {
                                     WHERE UR.USER_ID=U.USER_ID
                                       AND UR.RIGHT_ID=R.RIGHTS_ID
                                   )
-                    WHERE U.USER_ID=:currentUser
+                    WHERE U.USER_ID=`+currentUser+`
                   ) T
               WHERE T.NAME IS NOT NULL
               UNION ALL
@@ -475,12 +480,12 @@ function Users() {
                               ELSE 1
                             END DISABLED
                       FROM REP_RIGHTS R
-                     WHERE :currentUser=-777
+                     WHERE `+currentUser+`=-777
                   ) T
               WHERE T.NAME IS NOT NULL
               ORDER BY 1`,
        afterLoadData:(thisV)=>{
-           thisV.state.selectRowFull=[];
+           thisV.state.selectRowFull=undefined;
            $(tabUser2).find('tr.checked').removeClass('checked');
        },
       rowEvents: {
@@ -490,7 +495,7 @@ function Users() {
           if (!$(el).is('input[id^="checkRight-"]')) {
             const tr=$(el).closest('tr');
             if ($(tr).hasClass('checked')) {
-               refTableRight.current.state.selectRowFull=[];
+               refTableRight.current.state.selectRowFull=undefined;
                $(tr).removeClass('checked');
             }
             else {
@@ -526,7 +531,7 @@ function Users() {
                 refWinModalRigth.current.setState(getWinModalRights('add'));
              },
       editRow:(thisV) => {
-              if (thisV.state.selectRowFull.length===0) {
+              if (!!!thisV.state.selectRowFull) {
                   refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
               }
               else {
@@ -534,7 +539,7 @@ function Users() {
               }
             },
       deleteRow:(thisV) => {
-                  if (thisV.state.selectRowFull.length===0) {
+                  if (!!!thisV.state.selectRowFull) {
                       refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать право'});
                   }
                   else {

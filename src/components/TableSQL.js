@@ -10,8 +10,8 @@ class TableSQL extends React.Component {
         this.getRowsBySQL = this.getRowsBySQL.bind(this);
         this.state = {
           rows: [],
-          selectRow:[],
-          selectRowFull:[],
+          selectRow:undefined,
+          selectRowFull:undefined,
         };
         this.pr_tableSQLdopAction_vis=false;
         this.ul_oda=undefined;

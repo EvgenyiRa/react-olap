@@ -968,3 +968,7 @@ button.close {
     text-shadow: 0 1px 0 #fff;
     opacity: .5;
 }
+
+div.react-bootstrap-table table tbody tr.checked {
+  background-color: #ccfcfc;
+}
