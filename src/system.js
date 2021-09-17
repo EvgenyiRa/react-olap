@@ -409,6 +409,9 @@ export function getSQLRun2(data,callback,stateLoadObj) {
           else {
             setDataError();
           }
+        })
+        .catch((error) => {
+            console.log(error);
         });
       }
       axiosInstanceFunc();

@@ -4,7 +4,6 @@ import Loading from '../../components/Loading';
 import AlertPlus from '../../components/AlertPlus';
 import ConfirmPlus from '../../components/ConfirmPlus';
 import WinModal from '../../components/WinModal';
-import TableOLAP from '../../components/TableOLAP';
 import BootstrapInput from '../../components/BootstrapInput';
 import MultiselectSQL from '../../components/MultiselectSQL';
 import TableSQL from '../../components/TableSQL';
@@ -13,7 +12,7 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 import CheckboxMUI from '../../components/CheckboxMUI';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import {getDBType,getSQLRun,getHashPwd} from '../../system.js';
+import {getDBType,getSQLRun,getSQLRun2,getHashPwd} from '../../system.js';
 import filterFactory, { textFilter } from 'react-bootstrap-table2-filter';
 /*import { format,startOfMonth } from 'date-fns';*/
 
@@ -37,7 +36,8 @@ function Users() {
         refTableRight=useRef(),
         refWinModalRigth=useRef(),
         refInputRightName=useRef(),
-        refInputRightSysName=useRef();
+        refInputRightSysName=useRef(),
+        refMultiselectSQL=useRef();
 
   const tabUser='table#tab1 tbody';
 
@@ -342,10 +342,17 @@ function Users() {
                       if (type==='add') {
                           if (!prErr) {
                              data.sql=`INSERT INTO REP_RIGHTS (NAME, SYSNAME) VALUES (?, ?)`;
-                             getSQLRun(data,
+                             const dataTrue={execsql:[data]};
+                             let data2={sql:`SELECT LAST_INSERT_ID() RIGHT_ID_V`};
+                             dataTrue.execsql.push(data2);
+                             getSQLRun2(dataTrue,
                                           function(response0) {
                                              refTableRight.current.getRowsBySQL();
                                              $('div.fade.modal.show:first').show();
+                                             //добавляем новое право в фильтр по правам
+                                             const newOption=[...refMultiselectSQL.current.state.options];
+                                             newOption.push({value:response0.result[1][0][0]['RIGHT_ID_V'],label:refInputRightName.current.state.value});
+                                             refMultiselectSQL.current.setState({options:newOption});
                                              refWinModalRigth.current.setModalShow(false);
                                           },
                                           refLoading
@@ -430,7 +437,7 @@ function Users() {
     }
     //объект для таблицы с данными из БД
     let currentUser;
-    if (!!refTableSQL.current.state.selectRowFull) {
+    if ((!!refTableSQL.current.state.selectRowFull) & (type==='edit')) {
         currentUser=refTableSQL.current.state.selectRowFull['USER_ID']
     }
     else {
@@ -444,8 +451,7 @@ function Users() {
        sql:`SELECT R.NAME,
                     R.SYSNAME,
                     R.RIGHTS_ID,
-                    1 VALUE,
-                    0 DISABLED
+                    1 VALUE
               FROM REP_RIGHTS R
               JOIN REP_USERS_RIGHTS UR
               ON R.RIGHTS_ID=UR.RIGHT_ID
@@ -457,8 +463,7 @@ function Users() {
               FROM (SELECT R.NAME,
                            R.SYSNAME,
                             R.RIGHTS_ID,
-                            0 VALUE,
-                            1  DISABLED
+                            0 VALUE
                       FROM REP_USERS U
                       LEFT JOIN REP_RIGHTS R
                       ON 1=1
@@ -475,10 +480,7 @@ function Users() {
               FROM (SELECT R.NAME,
                            R.SYSNAME,
                             R.RIGHTS_ID,
-                            0 VALUE,
-                            CASE WHEN 'add'='`+type+`' THEN 0
-                              ELSE 1
-                            END DISABLED
+                            0 VALUE
                       FROM REP_RIGHTS R
                      WHERE `+currentUser+`=-777
                   ) T
@@ -511,18 +513,16 @@ function Users() {
                {dataField:'SYSNAME',text:'Сис. наименование права',headerAttrs: (column, colIndex) => ({ 'width': `110px` })},
                {dataField:'VALUE',text:'Наличие',headerAttrs: (column, colIndex) => ({ 'width': `90px` }),
                formatter:(cell, row, rowIndex)=> {
-                  if (+row['DISABLED']!==1) {
-                    return (
-                        <CheckboxMUI obj={{
-                            beginChecked:+cell===1,
-                            onChange:(e,thisV)=> {
-                                refTableRight.current.state.rows[rowIndex]['VALUE']=(e.target.checked)?1:0;
-                                thisV.setState({checked:e.target.checked})
-                            }
-                          }}
-                        />
-                    );
-                  }
+                  return (
+                      <CheckboxMUI obj={{
+                          beginChecked:+cell===1,
+                          onChange:(e,thisV)=> {
+                              refTableRight.current.state.rows[rowIndex]['VALUE']=(e.target.checked)?1:0;
+                              thisV.setState({checked:e.target.checked})
+                          }
+                        }}
+                      />
+                  );
                 }
               }
             ],
@@ -543,32 +543,44 @@ function Users() {
                       refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать право'});
                   }
                   else {
-                      refConfirmPlus.current.setState({show:true,
-                                                        text:'Вы действительно хотите удалить право с наименованием "'+thisV.state.selectRowFull['NAME']+'"',
-                                                        callback:(res) => {
-                                                            if (res) {
-                                                              let right_id=+thisV.state.selectRowFull['RIGHTS_ID'];
-                                                              if (!!right_id) {
-                                                                  let data={};
-                                                                  data.exec_params_in={};
-                                                                  data.execsql=`BEGIN
-                                                                                  DELETE FROM REP_USERS_RIGHTS
-                                                                                   WHERE RIGHT_ID=:right_id;
-                                                                                  DELETE
-                                                                                   FROM REP_RIGHTS
-                                                                                  WHERE RIGHTS_ID=:right_id;
-                                                                                END;`;
-                                                                  data.exec_params_in.right_id=right_id;
-                                                                  getSQLRun(data,
-                                                                               function(response0) {
-                                                                                  refAlertPlus.current.setState({show:true,text:'Выбранный пользователь успешно удалён'});
-                                                                                  thisV.getRowsBySQL();
-                                                                               },
-                                                                               refLoading
-                                                                             );
-                                                              }
-                                                            }
-                                                        }});
+                      refConfirmPlus.current.setState({
+                        show:true,
+                        text:'Вы действительно хотите удалить право с наименованием "'+thisV.state.selectRowFull['NAME']+'"',
+                        callback:(res) => {
+                            if (res) {
+                              let right_id=+thisV.state.selectRowFull['RIGHTS_ID'];
+                              if (!!right_id) {
+                                  let data={
+                                    execsql:[
+                                      {sql:`DELETE FROM REP_USERS_RIGHTS
+                                            WHERE RIGHT_ID=?`,
+                                       params:[right_id]
+                                      },
+                                      {sql:`DELETE FROM REP_RIGHTS
+                                             WHERE RIGHTS_ID=?`,
+                                       params:[right_id]
+                                      }
+                                    ]
+                                  }
+                                  getSQLRun2(data,
+                                     function(response0) {
+                                        refAlertPlus.current.setState({show:true,text:'Выбранное право успешно удалёно'});
+                                        thisV.getRowsBySQL();
+                                        //удаляем пользователя из фильтра прав
+                                        const newOption=[...refMultiselectSQL.current.state.options];
+                                        for (var i = 0; i < newOption.length; i++) {
+                                          if (newOption[i].value==right_id) {
+                                            newOption.splice(i, 1);
+                                            break;
+                                          }
+                                        }
+                                        refMultiselectSQL.current.setState({options:newOption});
+                                     },
+                                     refLoading
+                                   );
+                              }
+                            }
+                      }});
                   }
                },
        //paginationFactory:paginationFactory,
@@ -690,7 +702,7 @@ function Users() {
       <Container fluid>
         <Row>
           <Col>
-            <MultiselectSQL obj={selectRightObj}/>
+            <MultiselectSQL ref={refMultiselectSQL} obj={selectRightObj}/>
           </Col>
         </Row>
         <Row style={{marginTop:'1rem'}}>
