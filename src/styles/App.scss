@@ -425,12 +425,13 @@ z-index:10000;
 }
 
 li.li_cons {
-position:relative;
-display:inline-block;
-list-style:none;
-background: white;
-color: black;
-cursor: pointer;
+  position:relative;
+  display:inline-block;
+  list-style:none;
+  background: white;
+  color: black;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 ul.second-level li:hover {

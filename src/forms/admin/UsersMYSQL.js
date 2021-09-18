@@ -9,11 +9,11 @@ import MultiselectSQL from '../../components/MultiselectSQL';
 import TableSQL from '../../components/TableSQL';
 import Container from 'react-bootstrap/Container';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import filterFactory, { textFilter } from 'react-bootstrap-table2-filter';
 import CheckboxMUI from '../../components/CheckboxMUI';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import {getDBType,getSQLRun,getSQLRun2,getHashPwd} from '../../system.js';
-import filterFactory, { textFilter } from 'react-bootstrap-table2-filter';
 /*import { format,startOfMonth } from 'date-fns';*/
 
 import $ from 'jquery';
@@ -179,9 +179,7 @@ function Users() {
     const tabUser2='table#tab2 tbody';
     const handleButtonNextL=() => {
       let data={};
-      data.exec_params_in={};
-      data.exec_params_in['fio']=refInputFIO.current.state.value;
-      data.exec_params_in['login']=refInputLogin.current.state.value;
+      data.params=[refInputFIO.current.state.value.trim(),refInputLogin.current.state.value]
       let prErr=false;
       if ((!!!refInputFIO.current.state.value) || (!!!refInputLogin.current.state.value)) {
         prErr=true;
@@ -195,23 +193,33 @@ function Users() {
       if (!prErr) {
         //проверяем существование пользователя с введенным логином
         let data1={};
-        data1.params={login:data.exec_params_in['login']};
+        data1.params=[data.params[0]];
         //let resp_data;
         data1.sql=`SELECT COUNT(1) COUNT
                     FROM REP_USERS
-                   WHERE login=:login`;
+                   WHERE login=?`;
         if (type==='edit') {
-          data.exec_params_in['user_id']=+refTableSQL.current.state.selectRowFull['USER_ID'];
-          data1.params.user_id=data.exec_params_in['user_id'];
-          data1.sql+=` AND USER_ID!=:user_id`;
+          data1.params.push(+refTableSQL.current.state.selectRowFull['USER_ID']);
+          data1.sql+=` AND USER_ID!=?`;
         }
         getSQLRun(data1,(response1)=> {
                   if (response1.data[0].COUNT>0) {
                       refInputLogin.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
                   }
                   else {
-                    data.exec_params_in['email']=(!!!refInputEmail.current.state.value)?null:refInputEmail.current.state.value.trim();
-                    data.exec_params_in['phone']=(!!!refInputPhone.current.state.value)?null:refInputPhone.current.state.value.trim();
+                    data.params.push((!!!refInputEmail.current.state.value)?null:refInputEmail.current.state.value.trim());
+                    data.params.push((!!!refInputPhone.current.state.value)?null:refInputPhone.current.state.value.trim());
+                    const setSQLright=(dataTrueIn)=>{
+                      refTableRight.current.state.rows.forEach((item, i) => {
+                         if (item.VALUE===1) {
+                             dataTrueIn.execsql.push({
+                                 params:[item.RIGHTS_ID],
+                                 sql:`INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
+                                           VALUES (@user_id,?)`
+                             });
+                         }
+                      });
+                    }
                     if (type==='add') {
                         let data0={password:refInputPwdVis.current.state.value};
                         if (!!!refInputPwdVis.current.state.value) {
@@ -223,22 +231,26 @@ function Users() {
                           refInputPwdVis.current.setState({isInvalid:true,invalidText:'Не менее 6 символов'})
                         }
                         if (!prErr) {
-                          data.execsql=`INSERT INTO REP_USERS (USER_ID, FIO, LOGIN, PASSWORD, EMAIL, PHONE, SOL)
-                                        VALUES (REP_USERS_ID_SQ.NEXTVAL, :fio, :login, :password, :email, :phone, :sol)
-                                     RETURNING USER_ID INTO :user_id`;
-                         data.exec_params_out=[];
-                         data.exec_params_out.push({name:'user_id',type:'number'});
+                          data.sql=`INSERT INTO REP_USERS (FIO, LOGIN, EMAIL, PHONE, PASSWORD, SOL)
+                                        VALUES (?, ?, ?, ?, ?, ?)`;
                           getHashPwd(data0,
                                      function(response) {
-                                       data.exec_params_in['password']=response.hash;
-                                       data.exec_params_in['sol']=response.sol;
-                                       getSQLRun(data,
-                                                    function(response0) {
-                                                        refTableSQL.current.getRowsBySQL();
-                                                        refWinModal.current.setState({modalShow:false});
-                                                    },
-                                                    refLoading
-                                                  );
+                                       data.params.push(response.hash);
+                                       data.params.push(response.sol);
+                                       const dataTrue={
+                                          execsql:[
+                                            data,
+                                            {sql:`SET @user_id = LAST_INSERT_ID()`}
+                                          ]
+                                       };
+                                       setSQLright(dataTrue);
+                                       getSQLRun2(dataTrue,
+                                          function(response0) {
+                                              refTableSQL.current.getRowsBySQL();
+                                              refWinModal.current.setState({modalShow:false});
+                                          },
+                                          refLoading
+                                       );
                                      },
                                      refLoading
                                     );
@@ -256,19 +268,26 @@ function Users() {
                           }
                         }
                         if (!prErr) {
-                          data.exec_params_in['password']=null;
-                          data.execsql=`UPDATE REP_USERS
-                                           SET FIO=:fio,
-                                               LOGIN=:login,
-                                               PASSWORD=NVL(:password,PASSWORD),
-                                               EMAIL=:email,
-                                               PHONE=:phone
-                                         WHERE USER_ID=:user_id`;
+                          //пароль
+                          let pwdIndex=data.params.push(null)-1;
+                          data.sql=`UPDATE REP_USERS
+                                       SET FIO=?,
+                                           LOGIN=?,
+                                           EMAIL=?,
+                                           PHONE=?,
+                                           PASSWORD=COALESCE(?,PASSWORD)
+                                     WHERE USER_ID=@user_id`;
                          function updUser() {
-                           getSQLRun(data,
+                           const dataTrue={
+                              execsql:[
+                                  {sql:`SET @user_id = ?`,params:[+refTableSQL.current.state.selectRowFull['USER_ID']]},
+                                  data,
+                                  {sql:`DELETE FROM REP_USERS_RIGHTS WHERE USER_ID=@user_id`},
+                              ]
+                           };
+                           setSQLright(dataTrue);
+                           getSQLRun2(dataTrue,
                                         function(response0) {
-                                           //обновляем таблицу
-
                                           refTableSQL.current.getRowsBySQL();
                                           refWinModal.current.setState({
                                               modalShow:false,
@@ -286,7 +305,7 @@ function Users() {
                           data0.sol=refTableSQL.current.state.selectRowFull['SOL'];
                           getHashPwd(data0,
                                      function(response) {
-                                       data.exec_params_in['password']=response.hash;
+                                       data[pwdIndex]=response.hash;
                                        updUser();
                                      },
                                      refLoading
@@ -509,8 +528,16 @@ function Users() {
         }
       },
       keyField:'RIGHTS_ID',
-      columns:[{dataField:'NAME',text:'Наименование права',headerAttrs: (column, colIndex) => ({ 'width': `170px` })},
-               {dataField:'SYSNAME',text:'Сис. наименование права',headerAttrs: (column, colIndex) => ({ 'width': `110px` })},
+      columns:[{dataField:'NAME',text:'Наименование права',headerAttrs: (column, colIndex) => ({ 'width': `170px` }),
+                filter: textFilter({
+                  delay: 1000,
+                  placeholder: '...',
+                })},
+               {dataField:'SYSNAME',text:'Сис. наименование права',headerAttrs: (column, colIndex) => ({ 'width': `110px` }),
+                filter: textFilter({
+                  delay: 1000,
+                  placeholder: '...',
+                })},
                {dataField:'VALUE',text:'Наличие',headerAttrs: (column, colIndex) => ({ 'width': `90px` }),
                formatter:(cell, row, rowIndex)=> {
                   return (
@@ -532,7 +559,7 @@ function Users() {
              },
       editRow:(thisV) => {
               if (!!!thisV.state.selectRowFull) {
-                  refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать пользователя'});
+                  refAlertPlus.current.setState({show:true,text:'Необходимо кликом левой кнопки мыши по строке таблицы выбрать право'});
               }
               else {
                   refWinModalRigth.current.setState(getWinModalRights('edit'));
@@ -584,7 +611,7 @@ function Users() {
                   }
                },
        //paginationFactory:paginationFactory,
-       //filterFactory:filterFactory,
+      filterFactory:filterFactory,
       componentDidMount:(thisV)=>{
           thisV.getRowsBySQL();
       }
