@@ -137,16 +137,21 @@ function Users() {
                                                           if (res) {
                                                             let user_id=+thisV.state.selectRowFull['USER_ID'];
                                                             if (!!user_id) {
-                                                                let data={};
-                                                                data.sql=`DELETE FROM REP_USERS
-                                                                           WHERE USER_ID=:user_id;
-                                                                          DELETE FROM REP_USERS_RIGHTS
-                                                                          WHERE USER_ID=:user_id;`;
-                                                                data.params=[user_id];
-                                                                getSQLRun(data,
+                                                                let data={
+                                                                  execsql:[
+                                                                    {sql:`DELETE FROM REP_USERS
+                                                                           WHERE USER_ID=?`,
+                                                                     params:[user_id]
+                                                                    },
+                                                                    {sql:`DELETE FROM REP_USERS_RIGHTS
+                                                                                WHERE USER_ID=?`,
+                                                                     params:[user_id]}
+                                                                  ]
+                                                                }
+                                                                getSQLRun2(data,
                                                                              function(response0) {
                                                                                 refAlertPlus.current.setState({show:true,text:'Выбранный пользователь успешно удалён'});
-                                                                                thisV.getDataSQL();
+                                                                                thisV.getRowsBySQL();
                                                                                 //обновление строк таблицы
                                                                              },
                                                                              refLoading
@@ -277,7 +282,7 @@ function Users() {
                                            PHONE=?,
                                            PASSWORD=COALESCE(?,PASSWORD)
                                      WHERE USER_ID=@user_id`;
-                         function updUser() {
+                          function updUser() {
                            const dataTrue={
                               execsql:[
                                   {sql:`SET @user_id = ?`,params:[+refTableSQL.current.state.selectRowFull['USER_ID']]},
@@ -301,15 +306,15 @@ function Users() {
                                         refLoading
                                       );
                          }
-                         if (!!refInputPwdVis.current.state.value) {
-                          data0.sol=refTableSQL.current.state.selectRowFull['SOL'];
-                          getHashPwd(data0,
-                                     function(response) {
-                                       data[pwdIndex]=response.hash;
-                                       updUser();
-                                     },
-                                     refLoading
-                                    );
+                          if (!!refInputPwdVis.current.state.value) {
+                            data0.sol=refTableSQL.current.state.selectRowFull['SOL'];
+                            getHashPwd(data0,
+                                       function(response) {
+                                         data.params[pwdIndex]=response.hash;
+                                         updUser();
+                                       },
+                                       refLoading
+                                      );
                           }
                           else {
                             updUser();
