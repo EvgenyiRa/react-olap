@@ -146,7 +146,7 @@ export function delAuth(prReload) {
 
 export function getParamForSQL(paramGroup,parParentID,data) {
       if ((!!paramGroup) & (!!parParentID)) {
-        if (dbtype!=='mysql') {
+        if (['mysql','pg'].indexOf(dbtype)===-1) {
           parParentID.forEach(function(item) {
             if (!Array.isArray(paramGroup[item])) {
               data.params[item]=paramGroup[item];
@@ -195,6 +195,15 @@ export function getParamForSQL(paramGroup,parParentID,data) {
               return pos_simv;
           }
 
+          let simvUpd,
+              countParam=0;
+          if (dbtype==='mysql') {
+              simvUpd='?';
+          }
+          else {
+              simvUpd='$';
+          }
+
           const calc_one_param=()=> {
             if (pos>-1) {
                 let pos_pr=pos_sl_simv(data.sql,pos),
@@ -207,13 +216,13 @@ export function getParamForSQL(paramGroup,parParentID,data) {
                 }
 
                 if (tek_param in paramGroup) {
-                    let p_one_str_for_sql='?';
+                    let p_one_str_for_sql=simvUpd+((dbtype==='mysql')?'':String(++countParam));
                     if (Array.isArray(paramGroup[tek_param])) {
                         if (paramGroup[tek_param].length>0) {
                           data.params.push(paramGroup[tek_param][0]);
                           for (var i = 1; i < paramGroup[tek_param].length; i++) {
                             data.params.push(paramGroup[tek_param][i]);
-                            p_one_str_for_sql+=',?';
+                            p_one_str_for_sql+=','+simvUpd+((dbtype==='mysql')?'':String(++countParam));
                           }
                         }
                         else {
