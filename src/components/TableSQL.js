@@ -30,7 +30,7 @@ class TableSQL extends React.Component {
       const thisV=this;
       if (!!this.props.obj.sql) {
         var data = {};
-        if (this.dbtype==='mysql') {
+        if (['mysql','pg'].indexOf(this.dbtype)>-1) {
             data.params=[];
         }
         else {

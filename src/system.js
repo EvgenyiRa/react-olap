@@ -410,7 +410,7 @@ export function getSQLRun2(data,callback,stateLoadObj) {
               response.data=responseDR;
               callback(response);
             }
-            else if ((dbtype==='mssql') || (dbtype==='mysql')) {
+            else if (['mssql','mysql','pg'].indexOf(dbtype)>-1) {
               let responseNew={result:response.data.result}
               callback(responseNew);
             }

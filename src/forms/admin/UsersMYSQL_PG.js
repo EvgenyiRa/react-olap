@@ -61,12 +61,12 @@ function Users() {
      tab_id:"tab1",
      paramGroup:paramGroupV,
      parParentID:['rights'],
-     sql:`SELECT U.FIO,
-                 U.USER_ID,
-                 U.LOGIN,
-                 U.SOL,
-                 U.EMAIL,
-                 U.PHONE
+     sql:`SELECT U.FIO "FIO",
+                 U.USER_ID "USER_ID",
+                 U.LOGIN "LOGIN",
+                 U.SOL "SOL",
+                 U.EMAIL "EMAIL",
+                 U.PHONE "PHONE"
            FROM REP_USERS U
            WHERE U.USER_ID IN (SELECT RU.USER_ID
                                  FROM rep_users_rights RU
@@ -472,10 +472,10 @@ function Users() {
        tableContainerClass:'max-content',
        bodyClasses:'body_row_dblclick',
        tab_id:"tab2",
-       sql:`SELECT R.NAME,
-                    R.SYSNAME,
-                    R.RIGHTS_ID,
-                    1 VALUE
+       sql:`SELECT R.NAME "NAME",
+                    R.SYSNAME "SYSNAME",
+                    R.RIGHTS_ID "RIGHTS_ID",
+                    1 "VALUE"
               FROM REP_RIGHTS R
               JOIN REP_USERS_RIGHTS UR
               ON R.RIGHTS_ID=UR.RIGHT_ID
@@ -484,10 +484,10 @@ function Users() {
               WHERE U.USER_ID=`+currentUser+`
               UNION ALL
               SELECT *
-              FROM (SELECT R.NAME,
-                           R.SYSNAME,
-                            R.RIGHTS_ID,
-                            0 VALUE
+              FROM (SELECT R.NAME "NAME",
+                           R.SYSNAME "SYSNAME",
+                            R.RIGHTS_ID "RIGHTS_ID",
+                            0 "VALUE"
                       FROM REP_USERS U
                       LEFT JOIN REP_RIGHTS R
                       ON 1=1
@@ -498,17 +498,17 @@ function Users() {
                                   )
                     WHERE U.USER_ID=`+currentUser+`
                   ) T
-              WHERE T.NAME IS NOT NULL
+              WHERE T.`+((dbType==='mssql')?'NAME':'"NAME"')+` IS NOT NULL
               UNION ALL
               SELECT *
-              FROM (SELECT R.NAME,
-                           R.SYSNAME,
-                            R.RIGHTS_ID,
-                            0 VALUE
+              FROM (SELECT R.NAME "NAME",
+                           R.SYSNAME "SYSNAME",
+                            R.RIGHTS_ID "RIGHTS_ID",
+                            0 "VALUE"
                       FROM REP_RIGHTS R
                      WHERE `+currentUser+`=-777
                   ) T
-              WHERE T.NAME IS NOT NULL
+              WHERE T.`+((dbType==='mssql')?'NAME':'"NAME"')+` IS NOT NULL
               ORDER BY 1`,
        afterLoadData:(thisV)=>{
            thisV.state.selectRowFull=undefined;

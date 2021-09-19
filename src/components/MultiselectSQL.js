@@ -36,7 +36,7 @@ class MultiselectSQL extends React.Component {
   getOptionsBySQL() {
     const val=this;
     var data = {};
-    if (this.dbtype==='mysql') {
+    if (['mysql','pg'].indexOf(this.dbtype)>-1) {
         data.params=[];
     }
     else {
