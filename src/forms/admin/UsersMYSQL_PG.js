@@ -13,7 +13,7 @@ import filterFactory, { textFilter } from 'react-bootstrap-table2-filter';
 import CheckboxMUI from '../../components/CheckboxMUI';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import {getDBType,getSQLRun,getSQLRun2,getHashPwd} from '../../system.js';
+import {getDBType,getSQLRun,getSQLRun2,getHashPwd,getSQLRunPromise} from '../../system.js';
 /*import { format,startOfMonth } from 'date-fns';*/
 
 import $ from 'jquery';
@@ -72,6 +72,11 @@ function Users() {
                                  FROM rep_users_rights RU
                                 WHERE RU.RIGHT_ID IN (:rights) OR COALESCE(:rights,-777)=-777
                               )
+             OR (NOT EXISTS(
+                   SELECT 1
+                   FROM rep_users_rights RU
+                   WHERE RU.USER_ID=U.USER_ID
+                 ) AND COALESCE(:rights,-777)=-777)
            ORDER BY U.LOGIN`,
      afterLoadRows:(thisV)=>{
          thisV.state.selectRowFull=undefined;
@@ -140,11 +145,11 @@ function Users() {
                                                                 let data={
                                                                   execsql:[
                                                                     {sql:`DELETE FROM REP_USERS
-                                                                           WHERE USER_ID=?`,
+                                                                           WHERE USER_ID=`+((dbType==='mssql')?'?':'$1'),
                                                                      params:[user_id]
                                                                     },
                                                                     {sql:`DELETE FROM REP_USERS_RIGHTS
-                                                                                WHERE USER_ID=?`,
+                                                                                WHERE USER_ID=`+((dbType==='mssql')?'?':'$1'),
                                                                      params:[user_id]}
                                                                   ]
                                                                 }
@@ -184,7 +189,6 @@ function Users() {
     const tabUser2='table#tab2 tbody';
     const handleButtonNextL=() => {
       let data={};
-      data.params=[refInputFIO.current.state.value.trim(),refInputLogin.current.state.value]
       let prErr=false;
       if ((!!!refInputFIO.current.state.value) || (!!!refInputLogin.current.state.value)) {
         prErr=true;
@@ -196,32 +200,47 @@ function Users() {
         }
       }
       if (!prErr) {
+        data.params=[refInputFIO.current.state.value.trim(),refInputLogin.current.state.value]
         //проверяем существование пользователя с введенным логином
         let data1={};
         data1.params=[data.params[0]];
         //let resp_data;
         data1.sql=`SELECT COUNT(1) COUNT
                     FROM REP_USERS
-                   WHERE login=?`;
+                   WHERE login=`+((dbType==='mssql')?'?':'$1');
         if (type==='edit') {
           data1.params.push(+refTableSQL.current.state.selectRowFull['USER_ID']);
-          data1.sql+=` AND USER_ID!=?`;
+          data1.sql+=` AND USER_ID!=`+((dbType==='mssql')?'?':'$2');
         }
-        getSQLRun(data1,(response1)=> {
+        getSQLRun(data1,async (response1)=> {
                   if (response1.data[0].COUNT>0) {
                       refInputLogin.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
                   }
                   else {
                     data.params.push((!!!refInputEmail.current.state.value)?null:refInputEmail.current.state.value.trim());
                     data.params.push((!!!refInputPhone.current.state.value)?null:refInputPhone.current.state.value.trim());
+                    let countParPg=6,
+                        rep_users_id;
                     const setSQLright=(dataTrueIn)=>{
                       refTableRight.current.state.rows.forEach((item, i) => {
                          if (item.VALUE===1) {
-                             dataTrueIn.execsql.push({
-                                 params:[item.RIGHTS_ID],
-                                 sql:`INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
-                                           VALUES (@user_id,?)`
-                             });
+                             if (dbType==='mssql') {
+                               dataTrueIn.execsql.push({
+                                   params:[item.RIGHTS_ID],
+                                   sql:`INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
+                                             VALUES (@user_id,?)`
+                               });
+                             }
+                             else {
+                               dataTrueIn.execsql.push({
+                                   params:[rep_users_id,item.RIGHTS_ID],
+                                   sql:`INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
+                                             VALUES ($1,$2)`
+                               });
+                                /*dataTrueIn.execsql[0].params.push(item.RIGHTS_ID);
+                                dataTrueIn.execsql[0].sql+=` INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
+                                                              VALUES (user_id_v,$`+String(++countParPg)+`);`;*/
+                             }
                          }
                       });
                     }
@@ -236,19 +255,45 @@ function Users() {
                           refInputPwdVis.current.setState({isInvalid:true,invalidText:'Не менее 6 символов'})
                         }
                         if (!prErr) {
-                          data.sql=`INSERT INTO REP_USERS (FIO, LOGIN, EMAIL, PHONE, PASSWORD, SOL)
+                          if (dbType==='mssql') {
+                            data.sql=`INSERT INTO REP_USERS (FIO, LOGIN, EMAIL, PHONE, PASSWORD, SOL)
                                         VALUES (?, ?, ?, ?, ?, ?)`;
+                          }
+                          else {
+                            rep_users_id=await getSQLRunPromise({
+                              sql:`SELECT nextval('rep_users_id_sq') user_id_v`
+                            });
+                            rep_users_id=rep_users_id.data[0]['user_id_v'];
+                            data.params.unshift(rep_users_id);
+                            data.sql=`INSERT INTO REP_USERS (user_id,FIO, LOGIN, EMAIL, PHONE, PASSWORD, SOL)
+                                           VALUES ($1, $2, $3, $4, $5, $6, $7)`
+                            /*data.sql=`DO $$DECLARE user_id_v numeric(17);
+                                      BEGIN
+                                        user_id_v:=nextval('rep_users_id_sq');
+                                        INSERT INTO REP_USERS (user_id,FIO, LOGIN, EMAIL, PHONE, PASSWORD, SOL)
+                                             VALUES (user_id_v,$1, $2, $3, $4, $5, $6);`;*/
+                          }
                           getHashPwd(data0,
                                      function(response) {
                                        data.params.push(response.hash);
                                        data.params.push(response.sol);
-                                       const dataTrue={
-                                          execsql:[
-                                            data,
-                                            {sql:`SET @user_id = LAST_INSERT_ID()`}
-                                          ]
-                                       };
+                                       let dataTrue;
+                                       if (dbType==='mssql') {
+                                          dataTrue={
+                                            execsql:[
+                                              data,
+                                              {sql:`SET @user_id = LAST_INSERT_ID()`}
+                                            ]
+                                          }
+                                       }
+                                       else {
+                                         dataTrue={execsql:[data]};
+                                       }
                                        setSQLright(dataTrue);
+                                       /*if (dbType==='pg') {
+                                         dataTrue.execsql[0].params=[refInputLogin.current.state.value];
+                                         dataTrue.execsql[0].sql+=` END$$;`;
+                                       }*/
                                        getSQLRun2(dataTrue,
                                           function(response0) {
                                               refTableSQL.current.getRowsBySQL();
@@ -273,23 +318,47 @@ function Users() {
                           }
                         }
                         if (!prErr) {
+                          if (dbType==='pg') {
+                            data.params.unshift(+refTableSQL.current.state.selectRowFull['USER_ID']);
+                          }
                           //пароль
                           let pwdIndex=data.params.push(null)-1;
-                          data.sql=`UPDATE REP_USERS
-                                       SET FIO=?,
-                                           LOGIN=?,
-                                           EMAIL=?,
-                                           PHONE=?,
-                                           PASSWORD=COALESCE(?,PASSWORD)
-                                     WHERE USER_ID=@user_id`;
+                          if (dbType==='mssql') {
+                            data.sql=`UPDATE REP_USERS
+                                         SET FIO=?,
+                                             LOGIN=?,
+                                             EMAIL=?,
+                                             PHONE=?,
+                                             PASSWORD=COALESCE(?,PASSWORD)
+                                       WHERE USER_ID=@user_id`;
+                          }
+                          else {
+                            data.sql=`DO $$DECLARE user_id_v numeric(17);
+                                      BEGIN
+                                        user_id_v:=$1;
+                                        UPDATE REP_USERS
+                                           SET FIO=$2,
+                                               LOGIN=$3,
+                                               EMAIL=$4,
+                                               PHONE=$5,
+                                               PASSWORD=COALESCE($6,PASSWORD)
+                                         WHERE USER_ID=user_id_v;
+                                        DELETE FROM REP_USERS_RIGHTS WHERE USER_ID=user_id_v;`;
+                          }
                           function updUser() {
-                           const dataTrue={
-                              execsql:[
-                                  {sql:`SET @user_id = ?`,params:[+refTableSQL.current.state.selectRowFull['USER_ID']]},
-                                  data,
-                                  {sql:`DELETE FROM REP_USERS_RIGHTS WHERE USER_ID=@user_id`},
-                              ]
-                           };
+                           let dataTrue;
+                           if (dbType==='mssql') {
+                             dataTrue={
+                                execsql:[
+                                    {sql:`SET @user_id = ?`,params:[+refTableSQL.current.state.selectRowFull['USER_ID']]},
+                                    data,
+                                    {sql:`DELETE FROM REP_USERS_RIGHTS WHERE USER_ID=@user_id`},
+                                ]
+                             };
+                           }
+                           else {
+                              dataTrue={execsql:[data]};
+                           }
                            setSQLright(dataTrue);
                            getSQLRun2(dataTrue,
                                         function(response0) {

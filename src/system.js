@@ -342,6 +342,10 @@ export function getSQLRun(data,callback,stateLoadObj) {
                 //для mysql
                 responseNew.dataFields=response.data.data;
             }
+            else if ((!!response.data.fields) & (dbtype==='pg')) {
+                //для mysql
+                responseNew.dataFields=response.data.fields;
+            }
             callback(responseNew);
           }
           else {
@@ -351,6 +355,17 @@ export function getSQLRun(data,callback,stateLoadObj) {
       }
       axiosInstanceFunc();
     }
+  });
+}
+
+export function getSQLRunPromise(data,stateLoadObj) {
+  return new Promise((resolve, reject) => {
+      getSQLRun(
+        data,
+        (response)=>{
+          resolve(response);
+        },
+        stateLoadObj);
   });
 }
 
