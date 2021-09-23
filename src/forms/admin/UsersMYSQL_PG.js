@@ -237,9 +237,6 @@ function Users() {
                                    sql:`INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
                                              VALUES ($1,$2)`
                                });
-                                /*dataTrueIn.execsql[0].params.push(item.RIGHTS_ID);
-                                dataTrueIn.execsql[0].sql+=` INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
-                                                              VALUES (user_id_v,$`+String(++countParPg)+`);`;*/
                              }
                          }
                       });
@@ -266,12 +263,7 @@ function Users() {
                             rep_users_id=rep_users_id.data[0]['user_id_v'];
                             data.params.unshift(rep_users_id);
                             data.sql=`INSERT INTO REP_USERS (user_id,FIO, LOGIN, EMAIL, PHONE, PASSWORD, SOL)
-                                           VALUES ($1, $2, $3, $4, $5, $6, $7)`
-                            /*data.sql=`DO $$DECLARE user_id_v numeric(17);
-                                      BEGIN
-                                        user_id_v:=nextval('rep_users_id_sq');
-                                        INSERT INTO REP_USERS (user_id,FIO, LOGIN, EMAIL, PHONE, PASSWORD, SOL)
-                                             VALUES (user_id_v,$1, $2, $3, $4, $5, $6);`;*/
+                                           VALUES ($1, $2, $3, $4, $5, $6, $7)`;
                           }
                           getHashPwd(data0,
                                      function(response) {
@@ -290,10 +282,6 @@ function Users() {
                                          dataTrue={execsql:[data]};
                                        }
                                        setSQLright(dataTrue);
-                                       /*if (dbType==='pg') {
-                                         dataTrue.execsql[0].params=[refInputLogin.current.state.value];
-                                         dataTrue.execsql[0].sql+=` END$$;`;
-                                       }*/
                                        getSQLRun2(dataTrue,
                                           function(response0) {
                                               refTableSQL.current.getRowsBySQL();
@@ -318,11 +306,9 @@ function Users() {
                           }
                         }
                         if (!prErr) {
-                          if (dbType==='pg') {
-                            data.params.unshift(+refTableSQL.current.state.selectRowFull['USER_ID']);
-                          }
                           //пароль
                           let pwdIndex=data.params.push(null)-1;
+                          rep_users_id=+refTableSQL.current.state.selectRowFull['USER_ID'];
                           if (dbType==='mssql') {
                             data.sql=`UPDATE REP_USERS
                                          SET FIO=?,
@@ -333,31 +319,33 @@ function Users() {
                                        WHERE USER_ID=@user_id`;
                           }
                           else {
-                            data.sql=`DO $$DECLARE user_id_v numeric(17);
-                                      BEGIN
-                                        user_id_v:=$1;
-                                        UPDATE REP_USERS
-                                           SET FIO=$2,
-                                               LOGIN=$3,
-                                               EMAIL=$4,
-                                               PHONE=$5,
-                                               PASSWORD=COALESCE($6,PASSWORD)
-                                         WHERE USER_ID=user_id_v;
-                                        DELETE FROM REP_USERS_RIGHTS WHERE USER_ID=user_id_v;`;
+                            data.sql=`UPDATE REP_USERS
+                                         SET FIO=$1,
+                                             LOGIN=$2,
+                                             EMAIL=$3,
+                                             PHONE=$4,
+                                             PASSWORD=COALESCE($5,PASSWORD)
+                                       WHERE USER_ID=$6`;
                           }
                           function updUser() {
                            let dataTrue;
                            if (dbType==='mssql') {
                              dataTrue={
                                 execsql:[
-                                    {sql:`SET @user_id = ?`,params:[+refTableSQL.current.state.selectRowFull['USER_ID']]},
+                                    {sql:`SET @user_id = ?`,params:[rep_users_id]},
                                     data,
                                     {sql:`DELETE FROM REP_USERS_RIGHTS WHERE USER_ID=@user_id`},
                                 ]
                              };
                            }
                            else {
-                              dataTrue={execsql:[data]};
+                             data.params.push(rep_users_id);
+                             dataTrue={
+                                execsql:[
+                                    data,
+                                    {sql:`DELETE FROM REP_USERS_RIGHTS WHERE USER_ID=$1`,params:[rep_users_id]},
+                                ]
+                             };
                            }
                            setSQLright(dataTrue);
                            getSQLRun2(dataTrue,
