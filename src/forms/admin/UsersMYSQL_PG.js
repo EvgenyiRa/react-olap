@@ -145,11 +145,11 @@ function Users() {
                                                                 let data={
                                                                   execsql:[
                                                                     {sql:`DELETE FROM REP_USERS
-                                                                           WHERE USER_ID=`+((dbType==='mssql')?'?':'$1'),
+                                                                           WHERE USER_ID=`+((dbType==='mysql')?'?':'$1'),
                                                                      params:[user_id]
                                                                     },
                                                                     {sql:`DELETE FROM REP_USERS_RIGHTS
-                                                                                WHERE USER_ID=`+((dbType==='mssql')?'?':'$1'),
+                                                                                WHERE USER_ID=`+((dbType==='mysql')?'?':'$1'),
                                                                      params:[user_id]}
                                                                   ]
                                                                 }
@@ -207,10 +207,10 @@ function Users() {
         //let resp_data;
         data1.sql=`SELECT COUNT(1) COUNT
                     FROM REP_USERS
-                   WHERE login=`+((dbType==='mssql')?'?':'$1');
+                   WHERE login=`+((dbType==='mysql')?'?':'$1');
         if (type==='edit') {
           data1.params.push(+refTableSQL.current.state.selectRowFull['USER_ID']);
-          data1.sql+=` AND USER_ID!=`+((dbType==='mssql')?'?':'$2');
+          data1.sql+=` AND USER_ID!=`+((dbType==='mysql')?'?':'$2');
         }
         getSQLRun(data1,async (response1)=> {
                   if (response1.data[0].COUNT>0) {
@@ -224,7 +224,7 @@ function Users() {
                     const setSQLright=(dataTrueIn)=>{
                       refTableRight.current.state.rows.forEach((item, i) => {
                          if (item.VALUE===1) {
-                             if (dbType==='mssql') {
+                             if (dbType==='mysql') {
                                dataTrueIn.execsql.push({
                                    params:[item.RIGHTS_ID],
                                    sql:`INSERT INTO REP_USERS_RIGHTS (USER_ID, RIGHT_ID)
@@ -252,7 +252,7 @@ function Users() {
                           refInputPwdVis.current.setState({isInvalid:true,invalidText:'Не менее 6 символов'})
                         }
                         if (!prErr) {
-                          if (dbType==='mssql') {
+                          if (dbType==='mysql') {
                             data.sql=`INSERT INTO REP_USERS (FIO, LOGIN, EMAIL, PHONE, PASSWORD, SOL)
                                         VALUES (?, ?, ?, ?, ?, ?)`;
                           }
@@ -270,7 +270,7 @@ function Users() {
                                        data.params.push(response.hash);
                                        data.params.push(response.sol);
                                        let dataTrue;
-                                       if (dbType==='mssql') {
+                                       if (dbType==='mysql') {
                                           dataTrue={
                                             execsql:[
                                               data,
@@ -309,7 +309,7 @@ function Users() {
                           //пароль
                           let pwdIndex=data.params.push(null)-1;
                           rep_users_id=+refTableSQL.current.state.selectRowFull['USER_ID'];
-                          if (dbType==='mssql') {
+                          if (dbType==='mysql') {
                             data.sql=`UPDATE REP_USERS
                                          SET FIO=?,
                                              LOGIN=?,
@@ -329,7 +329,7 @@ function Users() {
                           }
                           function updUser() {
                            let dataTrue;
-                           if (dbType==='mssql') {
+                           if (dbType==='mysql') {
                              dataTrue={
                                 execsql:[
                                     {sql:`SET @user_id = ?`,params:[rep_users_id]},
@@ -555,7 +555,7 @@ function Users() {
                                   )
                     WHERE U.USER_ID=`+currentUser+`
                   ) T
-              WHERE T.`+((dbType==='mssql')?'NAME':'"NAME"')+` IS NOT NULL
+              WHERE T.`+((dbType==='mysql')?'NAME':'"NAME"')+` IS NOT NULL
               UNION ALL
               SELECT *
               FROM (SELECT R.NAME "NAME",
@@ -565,7 +565,7 @@ function Users() {
                       FROM REP_RIGHTS R
                      WHERE `+currentUser+`=-777
                   ) T
-              WHERE T.`+((dbType==='mssql')?'NAME':'"NAME"')+` IS NOT NULL
+              WHERE T.`+((dbType==='mysql')?'NAME':'"NAME"')+` IS NOT NULL
               ORDER BY 1`,
        afterLoadData:(thisV)=>{
            thisV.state.selectRowFull=undefined;
