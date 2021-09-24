@@ -405,34 +405,50 @@ function Users() {
         if (!prErr) {
           //проверяем существование права с введенными наименованиями
           let data1={};
-          data1.params=[refInputRightSysName.current.state.value];
+          data1.params=[refInputRightSysName.current.state.value.trim().toUpperCase()];
           //let resp_data;
-          data1.sql=`SELECT COUNT(1) COUNT
+          data1.sql=`SELECT COUNT(1) "COUNT"
                        FROM REP_RIGHTS
-                      WHERE SYSNAME=?`;
+                      WHERE UPPER(SYSNAME) LIKE `+((dbType==='mysql')?'?':'$1');
           if (type==='edit') {
             data.params.push(refTableRight.current.state.selectRowFull['RIGHTS_ID']);
             data1.params.push(refTableRight.current.state.selectRowFull['RIGHTS_ID']);
-            data1.sql+=` AND RIGHTS_ID!=?`;
+            data1.sql+=` AND RIGHTS_ID!=`+((dbType==='mysql')?'?':'$2');
           }
-          getSQLRun(data1,(response1)=> {
+          getSQLRun(data1,async (response1)=> {
                     if (response1.data[0].COUNT>0) {
                         refInputRightSysName.current.setState({isInvalid:true,invalidText:'Уже существует, введите другое значение'});
                     }
                     else {
                       if (type==='add') {
                           if (!prErr) {
-                             data.sql=`INSERT INTO REP_RIGHTS (NAME, SYSNAME) VALUES (?, ?)`;
+                             let rep_right_id;
+                             if (dbType==='mysql') {
+                               data.sql=`INSERT INTO REP_RIGHTS (NAME, SYSNAME) VALUES (?, ?)`;
+                             }
+                             else {
+                               rep_right_id=await getSQLRunPromise({
+                                 sql:`SELECT nextval('rep_rights_id_sq') rep_right_id`
+                               });
+                               rep_right_id=rep_right_id.data[0]['rep_right_id'];
+                               data.params.unshift(rep_right_id);
+                               data.sql=`INSERT INTO REP_RIGHTS (RIGHTS_ID, NAME, SYSNAME) VALUES ($1, $2, $3)`;
+                             }
                              const dataTrue={execsql:[data]};
-                             let data2={sql:`SELECT LAST_INSERT_ID() RIGHT_ID_V`};
-                             dataTrue.execsql.push(data2);
+                             if (dbType==='mysql') {
+                               let data2={sql:`SELECT LAST_INSERT_ID() RIGHT_ID_V`};
+                               dataTrue.execsql.push(data2);
+                             }
                              getSQLRun2(dataTrue,
                                           function(response0) {
                                              refTableRight.current.getRowsBySQL();
                                              $('div.fade.modal.show:first').show();
                                              //добавляем новое право в фильтр по правам
                                              const newOption=[...refMultiselectSQL.current.state.options];
-                                             newOption.push({value:response0.result[1][0][0]['RIGHT_ID_V'],label:refInputRightName.current.state.value});
+                                             if (dbType==='mysql') {
+                                               rep_right_id=response0.result[1][0][0]['RIGHT_ID_V'];
+                                             }
+                                             newOption.push({value:rep_right_id,label:refInputRightName.current.state.value});
                                              refMultiselectSQL.current.setState({options:newOption});
                                              refWinModalRigth.current.setModalShow(false);
                                           },
@@ -442,9 +458,16 @@ function Users() {
                       }
                       else if (type==='edit') {
                         if (!prErr) {
-                          data.sql=`UPDATE REP_RIGHTS
-                                       SET NAME=?, SYSNAME=?
-                                     WHERE RIGHTS_ID=?`;
+                           if (dbType==='mysql') {
+                              data.sql=`UPDATE REP_RIGHTS
+                                           SET NAME=?, SYSNAME=?
+                                         WHERE RIGHTS_ID=?`;
+                           }
+                           else {
+                             data.sql=`UPDATE REP_RIGHTS
+                                          SET NAME=$1, SYSNAME=$2
+                                        WHERE RIGHTS_ID=$3`;
+                           }
                            getSQLRun(data,
                                         function(response0) {
                                            refTableRight.current.getRowsBySQL();
@@ -642,11 +665,11 @@ function Users() {
                                   let data={
                                     execsql:[
                                       {sql:`DELETE FROM REP_USERS_RIGHTS
-                                            WHERE RIGHT_ID=?`,
+                                            WHERE RIGHT_ID=`+((dbType==='mysql')?'?':'$1'),
                                        params:[right_id]
                                       },
                                       {sql:`DELETE FROM REP_RIGHTS
-                                             WHERE RIGHTS_ID=?`,
+                                             WHERE RIGHTS_ID=`+((dbType==='mysql')?'?':'$1'),
                                        params:[right_id]
                                       }
                                     ]
