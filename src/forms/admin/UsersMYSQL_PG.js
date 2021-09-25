@@ -188,26 +188,40 @@ function Users() {
   const getWinModalUser=(type) => {
     const tabUser2='table#tab2 tbody';
     const handleButtonNextL=() => {
-      let data={};
-      let prErr=false;
-      if ((!!!refInputFIO.current.state.value) || (!!!refInputLogin.current.state.value)) {
+      let data={},
+          prErr=false,
+          uFIO=refInputFIO.current.state.value,
+          uLogin=refInputLogin.current.state.value;
+      if (!!!uFIO) {
+          uFIO='';
+      }
+      else {
+          uFIO=uFIO.trim();
+      }
+      if (!!!uLogin) {
+          uLogin='';
+      }
+      else {
+          uLogin=uLogin.trim();
+      }
+      if ((uFIO.length===0) || (uLogin.length===0)) {
         prErr=true;
-        if (!!!refInputFIO.current.state.value) {
+        if (uFIO.length===0) {
           refInputFIO.current.setState({isInvalid:true,invalidText:'Поле обязательно к заполнению'});
         }
-        if (!!!refInputLogin.current.state.value) {
+        if (uLogin.length===0) {
           refInputLogin.current.setState({isInvalid:true,invalidText:'Поле обязательно к заполнению'});
         }
       }
       if (!prErr) {
-        data.params=[refInputFIO.current.state.value.trim(),refInputLogin.current.state.value]
+        data.params=[uFIO,uLogin]
         //проверяем существование пользователя с введенным логином
         let data1={};
-        data1.params=[data.params[0]];
+        data1.params=[uLogin.toUpperCase()];
         //let resp_data;
-        data1.sql=`SELECT COUNT(1) COUNT
+        data1.sql=`SELECT COUNT(1) "COUNT"
                     FROM REP_USERS
-                   WHERE login=`+((dbType==='mysql')?'?':'$1');
+                   WHERE UPPER(login) LIKE `+((dbType==='mysql')?'?':'$1');
         if (type==='edit') {
           data1.params.push(+refTableSQL.current.state.selectRowFull['USER_ID']);
           data1.sql+=` AND USER_ID!=`+((dbType==='mysql')?'?':'$2');
@@ -389,23 +403,38 @@ function Users() {
       $('div.fade.modal.show:first').hide();
       const handleButtonNextL=() => {
         let data={};
-        data.params=[];
-        data.params.push(refInputRightName.current.state.value);
-        data.params.push(refInputRightSysName.current.state.value);
+        let rSysname=refInputRightSysName.current.state.value,
+            rName=refInputRightName.current.state.value;
+        if (!!!rSysname) {
+            rSysname='';
+        }
+        else {
+            rSysname=rSysname.trim();
+        }
+        if (!!!rName) {
+            rName='';
+        }
+        else {
+            rName=rName.trim();
+        }
+
         let prErr=false;
-        if ((!!!refInputRightName.current.state.value) || (!!!refInputRightSysName.current.state.value)) {
+        if ((rName.length===0) || (rSysname.length===0)) {
           prErr=true;
-          if (!!!refInputRightName.current.state.value) {
+          if (rName.length===0) {
             refInputRightName.current.setState({isInvalid:true,invalidText:'Поле обязательно к заполнению'});
           }
-          if (!!!refInputRightSysName.current.state.value) {
+          if (rSysname.length===0) {
             refInputRightSysName.current.setState({isInvalid:true,invalidText:'Поле обязательно к заполнению'});
           }
         }
         if (!prErr) {
+          data.params=[];
+          data.params.push(rName);
+          data.params.push(rSysname);
           //проверяем существование права с введенными наименованиями
           let data1={};
-          data1.params=[refInputRightSysName.current.state.value.trim().toUpperCase()];
+          data1.params=[rSysname.toUpperCase()];
           //let resp_data;
           data1.sql=`SELECT COUNT(1) "COUNT"
                        FROM REP_RIGHTS
@@ -448,7 +477,7 @@ function Users() {
                                              if (dbType==='mysql') {
                                                rep_right_id=response0.result[1][0][0]['RIGHT_ID_V'];
                                              }
-                                             newOption.push({value:rep_right_id,label:refInputRightName.current.state.value});
+                                             newOption.push({value:rep_right_id,label:rName});
                                              refMultiselectSQL.current.setState({options:newOption});
                                              refWinModalRigth.current.setModalShow(false);
                                           },
@@ -471,6 +500,14 @@ function Users() {
                            getSQLRun(data,
                                         function(response0) {
                                            refTableRight.current.getRowsBySQL();
+                                           const newOption=[...refMultiselectSQL.current.state.options];
+                                           for (var i = 0; i < newOption.length; i++) {
+                                             if (newOption[i].value==refTableRight.current.state.selectRowFull['RIGHTS_ID']) {
+                                                newOption[i].label=rName;
+                                                break;
+                                             }
+                                           }
+                                           refMultiselectSQL.current.setState({options:newOption});
                                            $('div.fade.modal.show:first').show();
                                            refWinModalRigth.current.setModalShow(false);
                                         },
