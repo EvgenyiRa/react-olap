@@ -586,16 +586,22 @@ class TableOLAP extends React.Component {
        ev.originalEvent.dataTransfer.effectAllowed='move';
        if ($(ev.target).is('a.TabOLAPPol')) {
           ev.originalEvent.dataTransfer.setData("Text", 'nodrag');
+          return false;
        }
        else if ($(ev.target).is('div.td_pok_name')) {
           ev.originalEvent.dataTransfer.setData("Text", 'nodrag');
+          return false;
+       }
+       else if (($(ev.target).is('a.tab_sort_up')) || ($(ev.target).is('a.tab_sort_unup')) || ($(ev.target).is('img'))) {
+          ev.originalEvent.dataTransfer.setData("Text", 'nodrag');
+          return false;
        }
        else {
          ev.originalEvent.dataTransfer.setData("Text", ev.target.getAttribute('id'));
+         return true;
        }
-       ev.originalEvent.dataTransfer.setDragImage(ev.target,50,50);
+       ev.originalEvent.dataTransfer.setDragImage(ev.target,10,10);
        console.log('dragStart');
-       return true;
     }
 
     dragEnter(ev) {

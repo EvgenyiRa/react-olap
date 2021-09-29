@@ -202,6 +202,15 @@ function Users() {
                 );
       }
     }
+    let emailUpd;
+    if (type==='edit') {
+        emailUpd=$(tr).find('td#EMAIL').clone();
+        $(emailUpd).find('div.div_hidden').remove();
+        emailUpd=$(emailUpd).text();
+    }
+    else {
+        emailUpd=null;
+    }
     return {
         modalShow:true,
         header:(type==='add')?'Добавление пользователя':'Редактирование пользователя',
@@ -276,7 +285,7 @@ function Users() {
                         label:'Email',
                         id:"email",
                         type:"email",
-                        defaultValue:(type==='edit')?$(tr).find('td#EMAIL').text():null
+                        defaultValue:emailUpd
                       }}
                     />
                   </Col>
@@ -362,7 +371,7 @@ function Users() {
                                       function(response0) {
                                          const newRights=[...refSelectRight.current.state.options];
                                          for (var i = 0; i < newRights.length; i++) {
-                                           if (+newRights[i].value===data.params['right_id']) {
+                                           if (newRights[i].value==data.params['right_id']) {
                                              newRights[i].label=data.params['rightName'];
                                              refSelectRight.current.setState({options:newRights});
                                              break;
