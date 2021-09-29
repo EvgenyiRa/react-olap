@@ -474,9 +474,9 @@ position:absolute;
 top:100%;
 left:-9999em;
 width:130px;
-border-bottom:2px solid rgba(255,255,255,.8);
-border-right:2px solid rgba(255,255,255,.8);
-border-left:2px solid rgba(255,255,255,.8);
+border-bottom:2px solid black;
+border-right:2px solid black;
+border-left:2px solid black;
 margin:0;
 padding:0;
 z-index:10000;
@@ -526,6 +526,17 @@ ul.tableSQLdopAction.ul_cons.second-level li {
 ul.tableSQLdopAction.ul_cons.second-level li a {
   margin: 0 0.3em 0 0.3em;
   float:left;
+}
+
+div.TabOLAPPanelAction ul.tableDBdopAction.ul_cons.second-level {
+  top: 2rem;
+  left:0;
+  display: none;
+  width: auto;
+}
+
+div.TabOLAPPanelAction ul.tableDBdopAction.ul_cons.second-level li a{
+  padding: 0 0.1rem;
 }
 
 div.react-bootstrap-table-pagination {

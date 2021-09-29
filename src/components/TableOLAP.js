@@ -93,14 +93,14 @@ class TableOLAP extends React.Component {
 
         this.pr_tableDBdopAction_vis=false;
         this.ul_oda=undefined;
-        this.panelScroll=() => {
+        /*this.panelScroll=() => {
           if (this.pr_tableDBdopAction_vis) {
             var li_v=$(this.ul_oda).closest('li'),
                 this_top=$(li_v).offset().top+30,
                 this_left=$(li_v).offset().left+3;
             $(this.ul_oda).css({'left':this_left+'px','top':this_top+'px'});
           }
-       }
+        }*/
 
        //создаем список незадействованных полей
        this.getUlTabPol=() => {
@@ -999,9 +999,9 @@ class TableOLAP extends React.Component {
                     thisV.ul_oda=$(this).find('ul.tableDBdopAction');
                     if (!$(thisV.ul_oda).is(':visible')) {
                         $(thisV.ul_oda).show();
-                        var this_top=$(this).offset().top+30,
+                        /*var this_top=$(this).offset().top+30,
                             this_left=$(this).offset().left+3;
-                        $(thisV.ul_oda).css({'left':this_left+'px','top':this_top+'px'});
+                        $(thisV.ul_oda).css({'left':this_left+'px','top':this_top+'px'});*/
                         thisV.pr_tableDBdopAction_vis=true;
                     }
                     else {
@@ -1010,7 +1010,7 @@ class TableOLAP extends React.Component {
                     }
                 });
 
-                $('main').bind('scroll', thisV.panelScroll);
+                //$('main').bind('scroll', thisV.panelScroll);
 
                 thisV.props.obj.dopAction.forEach((item) => {
                   $("div#root").on('click', ".divForTableOLAP[id='"+thisV.props.obj.id+"'] ul.tableDBdopAction.ul_cons.second-level li.tableDBdopAction[id='"+item.id+"']",function() {
@@ -1555,7 +1555,7 @@ class TableOLAP extends React.Component {
           if (!!this.props.obj.dopAction) {
               $("div#root").off('click', ".divForTableOLAP[id='"+this.props.obj.id+"'] li.tableDBdopActionBlok");
 
-              $('main').unbind('scroll', this.panelScroll);
+              //$('main').unbind('scroll', this.panelScroll);
 
               this.props.obj.dopAction.forEach((item) => {
                 $("div#root").off('click', ".divForTableOLAP[id='"+this.props.obj.id+"'] ul.tableDBdopAction.ul_cons.second-level li.tableDBdopAction[id='"+item.id+"']");
