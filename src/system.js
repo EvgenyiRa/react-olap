@@ -127,9 +127,7 @@ export function delAuth(prReload) {
         console.log('Exit failed.' + response.status);
       }
       else {
-        let cityV=localStorage.getItem('city');
         localStorage.clear();
-        localStorage.setItem('city', cityV);
         userInfo=undefined;
         tagExit=false;
         console.log('node exit',response.data);
@@ -480,7 +478,7 @@ export function getAuth(callback,stateLoadObj) {
   }
 }
 
-export function getCheckRight(rigth,callback) {
+export function getExistRight(rigth,callback) {
     //callback м.б. не функция, а массив с правами,
     //чтобы обойтись без функции обратного вызова, при этом проверить наличие права
     if ((!!rigth) & (!!callback)) {
