@@ -191,6 +191,10 @@ class TableOLAP extends React.Component {
           $(trItogBlank).find('td').each(function(i,elem) {
               $(elem).html('');
           });
+          //устанавливаем ID, т.к. могут встречаться ячейки с неустановленным ID (возникают на стороне бэкенда при заполнении пустот)
+          $(trItogBlank).find('td.td_val_val').each(function(i,elem) {
+            $(elem).attr('id',indexRow[i]);
+          });
           if (thisV.state.strgrouping.apply) {
             if (!!thisV.state.strgrouping.onSubItog) {
               //инициализируем подсчет подытогов
@@ -216,10 +220,6 @@ class TableOLAP extends React.Component {
                       $(elem).prev().attr('colspan',++colspanTrTek)
                       $(elem).remove();
                     }
-                });
-                //устанавливаеи ID, т.к. могут встречаться ячейки с неустановленным ID (возникают на стороне бэкенда при заполнении пустот)
-                $(trItogBlankOne).find('td.td_val_val').each(function(i,elem) {
-                  $(elem).attr('id',indexRow[i]);
                 });
                 $(trItogBlankOne).attr('pritog','').attr('itogid',propIn);
                 thisV.state.strgrouping.onSubItog[propIn].itogBlankInit=trItogBlankOne;
