@@ -83,7 +83,7 @@ class TableSQL extends React.Component {
           if (!!this.props.obj.addRow) {
               $(ul_v).append(`<li id="`+this.props.obj.tab_id+`" class="li_cons li_cons_top tableSQLaddRow" style="background: none;">
                                   <a id="`+this.props.obj.tab_id+`" title="Добавить строку" class="tableSQLaddRow">
-                                      <img src="`+require('../img/add.png').default+`" style="height:1.8em;width:auto;">
+                                      <img src="`+require('../img/add.png')+`" style="height:1.8em;width:auto;">
                                   </a>
                               </li>`);
               $(ul_v).find('li.tableSQLaddRow').click(()=>thisV.props.obj.addRow(thisV));
@@ -91,7 +91,7 @@ class TableSQL extends React.Component {
           if (!!this.props.obj.editRow) {
               $(ul_v).append(`<li id="`+this.props.obj.tab_id+`" class="li_cons li_cons_top tableSQLeditRow" style="background: none;">
                                   <a id="`+this.props.obj.tab_id+`" title="Редактировать строку" class="tableSQLeditRow">
-                                      <img src="`+require('../img/edit.png').default+`" style="height:1.8em;width:auto;">
+                                      <img src="`+require('../img/edit.png')+`" style="height:1.8em;width:auto;">
                                   </a>
                               </li>`);
               $(ul_v).find('li.tableSQLeditRow').click(()=>thisV.props.obj.editRow(thisV));
@@ -99,14 +99,14 @@ class TableSQL extends React.Component {
           if (!!this.props.obj.deleteRow) {
               $(ul_v).append(`<li id="`+this.props.obj.tab_id+`" class="li_cons li_cons_top tableSQLdeleteRow" style="background: none;">
                                   <a id="`+this.props.obj.tab_id+`" title="Удалить строку" class="tableSQLdeleteRow">
-                                      <img src="`+require('../img/rep_del.png').default+`" style="height:1.8em;width:auto;">
+                                      <img src="`+require('../img/rep_del.png')+`" style="height:1.8em;width:auto;">
                                   </a>
                               </li>`);
               $(ul_v).find('li.tableSQLdeleteRow').click(()=>thisV.props.obj.deleteRow(thisV));
           }
           if (!!this.props.obj.dopAction) {
               $(ul_v).append(`<li id="`+this.props.obj.tab_id+`" class="li_cons li_cons_top tableSQLdopActionBlok" style="background: none;">
-                                <img src="`+require('../img/actions.png').default+`" style="height:1.8em;width:auto;" title="Доп.действия">
+                                <img src="`+require('../img/actions.png')+`" style="height:1.8em;width:auto;" title="Доп.действия">
                                 <ul class="tableSQLdopAction ul_cons second-level"></ul>
                               </li>`);
 

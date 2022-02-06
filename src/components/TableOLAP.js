@@ -50,27 +50,27 @@ class TableOLAP extends React.Component {
           if (!!thisV.props.obj.addRow) {
               $(ul_v).append(`<li id="`+thisV.props.obj.id+`" class="li_cons li_cons_top tableDBaddRow" style="background: none;">
                                   <a id="`+thisV.props.obj.id+`" title="Добавить строку" class="tableDBaddRow">
-                                      <img src="`+require('../img/add.png').default+`" style="height:1.8em;width:auto;">
+                                      <img src="`+require('../img/add.png')+`" style="height:1.8em;width:auto;">
                                   </a>
                               </li>`);
           }
           if (!!thisV.props.obj.editRow) {
               $(ul_v).append(`<li id="`+thisV.props.obj.id+`" class="li_cons li_cons_top tableDBeditRow" style="background: none;">
                                   <a id="`+thisV.props.obj.id+`" title="Редактировать строку" class="tableDBeditRow">
-                                      <img src="`+require('../img/edit.png').default+`" style="height:1.8em;width:auto;">
+                                      <img src="`+require('../img/edit.png')+`" style="height:1.8em;width:auto;">
                                   </a>
                               </li>`);
           }
           if (!!thisV.props.obj.deleteRow) {
               $(ul_v).append(`<li id="`+thisV.props.obj.id+`" class="li_cons li_cons_top tableDBdeleteRow" style="background: none;">
                                   <a id="`+thisV.props.obj.id+`" title="Удалить строку" class="tableDBdeleteRow">
-                                      <img src="`+require('../img/rep_del.png').default+`" style="height:1.8em;width:auto;">
+                                      <img src="`+require('../img/rep_del.png')+`" style="height:1.8em;width:auto;">
                                   </a>
                               </li>`);
           }
           if (!!thisV.props.obj.dopAction) {
               $(ul_v).append(`<li id="`+thisV.props.obj.id+`" class="li_cons li_cons_top tableDBdopActionBlok" style="background: none;">
-                                <img src="`+require('../img/actions.png').default+`" style="height:1.8em;width:auto;" title="Доп.действия">
+                                <img src="`+require('../img/actions.png')+`" style="height:1.8em;width:auto;" title="Доп.действия">
                                 <ul class="tableDBdopAction ul_cons second-level"></ul>
                               </li>`);
 
@@ -85,7 +85,7 @@ class TableOLAP extends React.Component {
           if (thisV.graf) {
               $(ul_v).append(`<li id="`+thisV.props.obj.id+`" class="li_cons li_cons_top table_graf" style="background: none;">
                                   <a id="`+thisV.props.obj.id+`" title="Построить 3D-график" class="tableDBaddRow">
-                                      <img src="`+require('../img/graf_tab.png').default+`" style="height:2.1em;width:auto;margin:0 0 0.3em 0;">
+                                      <img src="`+require('../img/graf_tab.png')+`" style="height:2.1em;width:auto;margin:0 0 0.3em 0;">
                                   </a>
                               </li>`);
           }
