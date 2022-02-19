@@ -1,12 +1,13 @@
 import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+//
 
 import $ from 'jquery';
 
 class AlertPlus extends React.Component {
   constructor(props) {
-      super(props);      
+      super(props);
       this.handleClick = this.handleClick.bind(this);
       this.handleShow = this.handleShow.bind(this);
       this.state = {
