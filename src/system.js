@@ -6,6 +6,7 @@ let dataServer,
     tagExit=false,
     dbtype='mssql',
     prErrorData=false,
+    authorization=undefined,
     axiosInstance;
 
 //получаем файл конфигурации
@@ -56,8 +57,6 @@ export function getTagExit() {
   return tagExit;
 }
 
-let token;
-
 export function get_cookie(cookie_name)
 {
   var results = document.cookie.match ( '(^|;) ?' + cookie_name + '=([^;]*)(;|$)' );
@@ -88,18 +87,60 @@ function set_cookie( name, value, houreLife, path, domain, secure)
 export function setAuth(data,callback) {
   axiosInstance.post('/auth/set',data)
   .then(function(response) {
+    authorization=false;
+    localStorage.setItem('authorization', 'n');
     if (response.status !== 200) {
       console.log('Authentication failed.' + response.status);
     }
     else {
-      if (!!response.data.token) {
-        set_cookie ('auth',response.data.token, houreLifeCookies);
-        token=response.data.token;
-        localStorage.setItem('tokenOne', response.data.tokenOne);
+      if (typeof response.data.authorization==='boolean') {
+        if (response.data.authorization) {
+            localStorage.setItem('authorization', 'y');
+            authorization=true;
+        }
       }
     }
-    callback(response);
+    callback(authorization);
   });
+}
+
+export function getAuthorization() {
+  //console.log(process.env);
+  if (typeof authorization!=='boolean') {
+     const authorizationRes=localStorage.getItem('authorization');
+     if (authorizationRes==='y') {
+         authorization=true;
+     }
+     else {
+         authorization=false;
+     }
+  }
+  if (!authorization) {
+    //смотрим конфиги, возможно первый запуск
+    $.ajax({
+      type: "POST",
+      url: '/auth/is_first_run',
+      dataType:'json',
+      async:false,
+      success: function(data) {
+        if (typeof data.result==='boolean') {
+          if (data.result===true) {
+            authorization=true;
+          }
+        }
+      },
+      error: function(xhr, status, error) {
+          alert("Ошибка получения данных о конфигурации");
+          console.log(xhr.responseText + '|\n' + status + '|\n' +error);
+      }
+    });
+  }
+  return authorization;
+}
+
+export function delAuth(prReload) {
+  localStorage.clear();
+  window.location.reload();
 }
 
 function delete_cookie( cookie_name )
@@ -107,39 +148,6 @@ function delete_cookie( cookie_name )
   var cookie_date = new Date ( );  // Текущая дата и время
   cookie_date.setTime ( cookie_date.getTime() - 1 );
   document.cookie = cookie_name += "=; expires=" + cookie_date.toGMTString();
-}
-
-export function delAuth(prReload) {
-  if (typeof prReload!=='boolean') {
-      prReload=true;
-  }
-  if (!!!token) {
-      token=get_cookie('auth');
-  }
-  if (!!token) {
-    tagExit=true;
-    let token_local=token;
-    delete_cookie('auth');
-    token=undefined;
-    axiosInstance.post('/auth/del',{authorization:token_local})
-    .then(function(response) {
-      if (response.status !== 200) {
-        console.log('Exit failed.' + response.status);
-      }
-      else {
-        localStorage.clear();
-        userInfo=undefined;
-        tagExit=false;
-        console.log('node exit',response.data);
-      }
-      if (prReload) {
-        window.location.reload();
-      }
-    });
-  }
-  else if (prReload) {
-    window.location.reload();
-  }
 }
 
 export function getParamForSQL(paramGroup,parParentID,data) {
@@ -293,22 +301,6 @@ export function getParamDiff(t_paramGroup,p_paramGroup,parParentID) {
         }
       }
       return result;
-}
-
-function getAuthorization(data,callback0) {
-  //console.log(process.env);
-  if (!!!token) {
-      token=get_cookie('auth');
-  }
-  if (!!token) {
-      data.authorization=token;
-      data.tokenOne=localStorage.getItem('tokenOne');
-      callback0(true);
-  }
-  else {
-    alert('Вы не авторизованы');
-    callback0(false);
-  }
 }
 
 export function getSQLRun(data,callback,stateLoadObj) {

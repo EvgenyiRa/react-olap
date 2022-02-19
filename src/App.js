@@ -5,11 +5,11 @@ import Layout from './Layout';
 import messages from './messages';
 import './styles/App.scss';
 import Enter from './Enter'
-import {get_cookie} from './system.js';;
+import {getAuthorization} from './system.js';;
 
 function App() {
   const [locale, setLocale] = useState('ru');
-  const [isAuth, setIsAuth] = useState(!!get_cookie('auth'));
+  const [isAuth, setIsAuth] = useState(getAuthorization());
   const caseStatus=function() {
       if (isAuth) {
         return (
@@ -22,7 +22,7 @@ function App() {
         return (
           <HashRouter>
             <Enter setIsAuth={setIsAuth}/>
-          </HashRouter>  
+          </HashRouter>
         );
       }
   }
